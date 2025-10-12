@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html lang="la-x-liturgica">
 <head>
   <meta charset="UTF-8">
-  <title>Deolan Language</title>
+  <title>Lingua Deolana — Translator</title>
   <style>
     body {
       font-family: 'Garamond', serif;
@@ -10,13 +11,144 @@
       padding: 2rem;
       line-height: 1.6;
     }
-    h1 { font-size: 2em; margin-bottom: 0.5em; }
-    p { max-width: 700px; }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      text-align: center;
+      font-variant: small-caps;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-variant: small-caps;
+    }
+    p {
+      max-width: 700px;
+      margin: 1rem auto;
+      text-align: justify;
+    }
+    .word {
+      cursor: pointer;
+      border-bottom: 1px dotted #555;
+    }
+    #translationBox {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: #f1ede6;
+      border: 1px solid #b5a97f;
+      padding: 10px;
+      font-size: 1.1em;
+      max-width: 400px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      display: none;
+    }
+    #translator {
+      background-color: #efe9da;
+      border: 1px solid #b5a97f;
+      border-radius: 10px;
+      padding: 1.5em;
+      margin: 3em auto;
+      text-align: center;
+      max-width: 600px;
+    }
+    input {
+      padding: 10px;
+      width: 300px;
+      font-size: 1.1em;
+      border: 1px solid #b5a97f;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #d3c8a6;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #c5b88e;
+    }
+    #output {
+      margin-top: 1em;
+      font-size: 1.2em;
+      color: #1e1914;
+    }
   </style>
 </head>
 <body>
   <h1>Lingua Deolana</h1>
-  <p>In nomina Deo Craigi, lux et tenebrae consociantur.</p>
+  <p>
+    <span class="word" data-translation="In the name of God Craig">In nomina Deo Craigi</span>,
+    <span class="word" data-translation="light and darkness unite">lux et tenebrae consociantur</span>.
+  </p>
   <p>Welcome to the home of the Deolan conlang — a sacred tongue of devotion and light.</p>
+
+  <div id="translationBox"></div>
+
+  <div id="translator">
+    <h2>Deolan ↔ English Translator</h2>
+    <input type="text" id="inputWord" placeholder="Enter word or phrase (English or Deolan)">
+    <br>
+    <button onclick="translateWord()">Translate</button>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const words = document.querySelectorAll('.word');
+    const box = document.getElementById('translationBox');
+    const dictionary = {};
+
+    // Automatically build dictionary from your sacred text
+    words.forEach(word => {
+      const deolan = word.textContent.trim().toLowerCase();
+      const english = word.dataset.translation.trim().toLowerCase();
+      dictionary[deolan] = english;
+      dictionary[english] = deolan;
+    });
+
+    // Popup when clicking words in text
+    words.forEach(word => {
+      word.addEventListener('click', () => {
+        box.textContent = word.dataset.translation;
+        box.style.display = 'block';
+      });
+    });
+    document.body.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('word')) {
+        box.style.display = 'none';
+      }
+    });
+
+    // Translator function (handles multi-word phrases)
+    function translateWord() {
+      const input = document.getElementById('inputWord').value.trim().toLowerCase();
+      const output = document.getElementById('output');
+      if (!input) {
+        output.innerHTML = "Enter a word or phrase to translate.";
+        return;
+      }
+
+      if (dictionary[input]) {
+        output.innerHTML = `<strong>${input}</strong> = ${dictionary[input]}`;
+        return;
+      }
+
+      const matches = Object.entries(dictionary)
+        .filter(([k, v]) => k.includes(input) || v.includes(input));
+
+      if (matches.length > 0) {
+        output.innerHTML = matches
+          .map(([k, v]) => `<strong>${k}</strong> = ${v}`)
+          .join("<br>");
+      } else {
+        output.innerHTML = `No translation found for "${input}".`;
+      }
+    }
+  </script>
 </body>
 </html>
