@@ -3,111 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <title>Lingua Deonic — Translator</title>
-<style>
-body { font-family: 'Garamond', serif; background: #f9f8f6; color: #1e1b16; padding: 2rem; line-height: 1.6; }
-h1 { font-size: 2em; margin-bottom: 0.5em; text-align: center; font-variant: small-caps; }
-h2 { text-align: center; margin-top: 2.5rem; font-variant: small-caps; }
-#translator { background-color: #efe9da; border: 1px solid #b5a97f; border-radius: 10px; padding: 1.5em; margin: 3em auto; text-align: center; max-width: 600px; }
-input { padding: 10px; width: 300px; font-size: 1.1em; border: 1px solid #b5a97f; border-radius: 8px; margin-bottom: 15px; }
-button { padding: 10px 20px; background-color: #d3c8a6; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
-button:hover { background-color: #c5b88e; }
-#output { margin-top: 1em; font-size: 1.2em; color: #1e1914; }
-</style>
 </head>
 <body>
 <h1>Lingua Deonic</h1>
-
-<div id="translator">
-<h2>Deolan ↔ English Translator</h2>
-<input type="text" id="inputWord" placeholder="Enter word or phrase (English or Deolan)">
-<br>
+<input type="text" id="inputWord" placeholder="Type something">
 <button onclick="translateWord()">Translate</button>
 <div id="output"></div>
-</div>
 
 <script>
-// Expanded dictionary from Initum-Terra books (up to "lupus veste")
 const dictionary = {
-  // People
-  "human": "homo",
-  "men": "homines",
-  "woman": "mulier",
-  "women": "mulieres",
-  "child": "puer",
-  "children": "pueri",
-  "shepherd": "pastor",
-  "shepherds": "pastores",
-  "prophet": "propheta",
-  "prophets": "prophetae",
-  "king": "rex",
-  "queen": "regina",
-  "priest": "sacerdos",
-  "priests": "sacerdotes",
-
-  // Animals
-  "sheep": "ovis",
-  "wolf": "lupus",
-  "wolves": "lupi",
-
-  // Places & objects
-  "city": "urbs",
-  "cities": "urbes",
-  "law": "lex",
-  "laws": "leges",
-  "robes": "vestes",
-  "clothing": "veste",
-  
-  // Concepts
-  "light": "lux",
-  "darkness": "tenebrae",
-  "god": "deo",
-  "gods": "domus",
-  "craig": "craigi",
-  "faith": "fides",
-  "love": "amor",
-  "peace": "pax",
-  "sin": "peccatum",
-  "evil": "malum",
-  "good": "bonum",
-  "order": "ordum",
-  "truth": "veritas",
-  "lies": "mendacia",
-  "justice": "iustitia",
-  "devotion": "devotio",
-  "sacred": "sacrum",
-  "spirit": "spiritus",
-  "spirits": "spiritus",
-
-  // Names
-  "Wondering": "Wonderium",
-  "Burt": "Brutum",
-
-  // Common phrases
-  "in the name of god craig": "in nomina deo craigi",
-  "light and darkness unite": "lux et tenebrae consociantur",
   "hello": "haoum",
-  "world": "mundus"
+  "world": "mundus",
+  "haoum": "hello",
+  "mundus": "world"
 };
-
-// Automatically add reverse translations (Deonic → English)
-Object.entries(dictionary).forEach(([en, de]) => {
-  dictionary[de.toLowerCase()] = en.toLowerCase();
-});
 
 function translateWord() {
   const input = document.getElementById('inputWord').value.trim().toLowerCase();
-  const output = document.getElementById('output');
-
-  if (!input) { 
-    output.textContent = "Enter a word or phrase to translate."; 
-    return; 
-  }
-
-  // Split phrase and translate each word
   const wordsArray = input.split(/\s+/);
   const translated = wordsArray.map(w => dictionary[w] || `[${w}]`).join(' ');
-
-  output.innerHTML = `<strong>${input}</strong> = ${translated}`;
+  document.getElementById('output').innerHTML = `<strong>${input}</strong> = ${translated}`;
 }
 </script>
 </body>
