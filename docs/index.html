@@ -4,95 +4,61 @@
 <meta charset="UTF-8">
 <title>Lingua Deonic — Translator</title>
 <style>
-  body { font-family: 'Garamond', serif; background: #f9f8f6; color: #1e1b16; padding: 2rem; line-height: 1.6; }
-  h1 { font-size: 2.2em; text-align: center; margin-bottom: 1rem; font-variant: small-caps; }
-  #translatorBox { max-width: 700px; margin: 0 auto; text-align: center; }
-  input { padding: 10px; width: 60%; font-size: 1.1em; border-radius: 8px; border: 1px solid #b5a97f; margin-right: 10px; }
-  button { padding: 10px 20px; font-size: 1.1em; border-radius: 8px; border: none; background-color: #d3c8a6; cursor: pointer; }
-  button:hover { background-color: #c5b88e; }
-  #output { margin-top: 20px; font-size: 1.2em; line-height: 1.6; text-align: left; }
-  .word { cursor: pointer; border-bottom: 1px dotted #555; }
-  #translationBoxPopup { position: fixed; bottom: 20px; right: 20px; background: #f1ede6; padding: 10px; border-radius: 8px; border: 1px solid #b5a97f; display: none; box-shadow: 0 0 5px rgba(0,0,0,0.3); max-width: 400px; }
-  .suggestions { color: #555; font-size: 0.95em; margin-top: 5px; }
+body { font-family: 'Garamond', serif; background: #f9f8f6; color: #1e1b16; padding: 2rem; line-height: 1.6; }
+h1 { text-align: center; font-variant: small-caps; }
+#translatorBox { max-width: 700px; margin: 0 auto; text-align: center; }
+input { padding: 10px; width: 60%; font-size: 1.1em; border-radius: 8px; border: 1px solid #b5a97f; margin-right: 10px; }
+button { padding: 10px 20px; font-size: 1.1em; border-radius: 8px; border: none; background-color: #d3c8a6; cursor: pointer; }
+button:hover { background-color: #c5b88e; }
+#output { margin-top: 20px; font-size: 1.2em; line-height: 1.6; text-align: left; }
 </style>
 </head>
 <body>
 
-<h1>Lingua Deonic Translator</h1>
-
+<h1>Lingua Deonic</h1>
 <div id="translatorBox">
   <input type="text" id="inputWord" placeholder="Type a word or phrase">
   <button onclick="translateWord()">Translate</button>
   <div id="output"></div>
 </div>
 
-<div id="translationBoxPopup"></div>
-
 <script>
+// ALL dictionary keys are lowercase
 const dictionary = {
-  // People & Names
   "human":"homo","men":"homines","woman":"mulier","women":"mulieres","child":"puer","children":"pueri",
   "shepherd":"pastor","shepherds":"pastores","prophet":"propheta","prophets":"prophetae",
   "king":"rex","queen":"regina","priest":"sacerdos","priests":"sacerdotes",
-  "Wondering":"Wonderium","Burt":"Brutum","Craig":"Craigi",
-
-  // Animals
+  "wondering":"wonderium","burt":"brutum","craig":"craigi",
   "sheep":"ovis","wolf":"lupus","wolves":"lupi","dog":"canis","birds":"aves","horse":"equus","cattle":"boves",
-
-  // Places & Objects
   "city":"urbs","cities":"urbes","law":"lex","laws":"leges","robes":"vestes","clothing":"veste","temple":"templum",
   "garden":"hortus","sheepfold":"ovile","pasture":"pascua",
-
-  // Concepts & Ideas
   "light":"lux","darkness":"tenebrae","faith":"fides","loyalty":"fidelis","trust":"fiducia","growth":"incrementum",
   "increase":"auctio","time":"tempus","day":"dies","night":"nox","heaven":"caelum","hell":"infernum",
   "angel":"angelus","demon":"daemon","blessing":"benedictio","grace":"gratia","flesh":"caro","blood":"sanguis",
   "hate":"odium","enemy":"inimicus","enemies":"inimici","war":"bellum","temptation":"tentatio","corruption":"corruptio",
   "fruitful":"fructuosus","invasive":"invasivus","seed":"semen","bug":"insectum","spirit":"spiritus","spirits":"spiritus",
   "devotion":"devotio","sacred":"sacrum","truth":"veritas","lies":"mendacia","justice":"iustitia","order":"ordum",
-
-  // Common phrases
   "hello":"haoum","world":"mundus","peace":"pax",
   "in the name of god craig":"in nomina deo craigi",
   "light and darkness unite":"lux et tenebrae consociantur"
 };
 
-// Build reverse dictionary automatically
+// Add reverse dictionary
 for (let key in dictionary) {
   const value = dictionary[key];
   if (!dictionary[value]) dictionary[value] = key;
 }
 
-// Translate function with suggestions
 function translateWord() {
   const input = document.getElementById('inputWord').value.trim().toLowerCase();
   const outputEl = document.getElementById('output');
-  if (!input) {
-    outputEl.innerHTML = "Enter a word or phrase to translate.";
-    return;
-  }
+  if (!input) { outputEl.innerHTML = "Enter a word or phrase."; return; }
 
   const wordsArray = input.split(/\s+/);
   const translated = wordsArray.map(w => dictionary[w] || `[${w}]`).join(' ');
 
-  // Suggest similar words
-  const suggestions = [];
-  wordsArray.forEach(w => {
-    if (!dictionary[w]) {
-      for (let k in dictionary) {
-        if (k.startsWith(w.slice(0,2))) suggestions.push(k);
-      }
-    }
-  });
-
-  let suggestionHTML = "";
-  if (suggestions.length) {
-    suggestionHTML = `<div class="suggestions">Did you mean: ${[...new Set(suggestions)].join(', ')}?</div>`;
-  }
-
-  outputEl.innerHTML = `<strong>${input}</strong> = ${translated}${suggestionHTML}`;
+  outputEl.innerHTML = `<strong>${input}</strong> = ${translated}`;
 }
 </script>
 </body>
 </html>
-
