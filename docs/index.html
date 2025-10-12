@@ -1,110 +1,114 @@
 <!DOCTYPE html>
 <html lang="la-x-liturgica">
 <head>
-  <meta charset="UTF-8">
-  <title>Lingua Deonic — Translator</title>
-  <style>
-    body { font-family: 'Garamond', serif; background: #f9f8f6; color: #1e1b16; padding: 2rem; line-height: 1.6; }
-    h1 { font-size: 2em; margin-bottom: 0.5em; text-align: center; font-variant: small-caps; }
-    h2 { text-align: center; margin-top: 2.5rem; font-variant: small-caps; }
-    p { max-width: 700px; margin: 1rem auto; text-align: justify; }
-    .word { cursor: pointer; border-bottom: 1px dotted #555; }
-    #translationBox { position: fixed; bottom: 10px; right: 10px; background-color: #f1ede6; border: 1px solid #b5a97f; padding: 10px; font-size: 1.1em; max-width: 400px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.3); display: none; }
-    #translator { background-color: #efe9da; border: 1px solid #b5a97f; border-radius: 10px; padding: 1.5em; margin: 3em auto; text-align: center; max-width: 600px; }
-    input { padding: 10px; width: 300px; font-size: 1.1em; border: 1px solid #b5a97f; border-radius: 8px; margin-bottom: 15px; }
-    button { padding: 10px 20px; background-color: #d3c8a6; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; transition: background-color 0.2s; }
-    button:hover { background-color: #c5b88e; }
-    #output { margin-top: 1em; font-size: 1.2em; color: #1e1914; }
-  </style>
+<meta charset="UTF-8">
+<title>Lingua Deonic — Translator</title>
+<style>
+body { font-family: 'Garamond', serif; background: #f9f8f6; color: #1e1b16; padding: 2rem; line-height: 1.6; }
+h1 { font-size: 2em; margin-bottom: 0.5em; text-align: center; font-variant: small-caps; }
+h2 { text-align: center; margin-top: 2.5rem; font-variant: small-caps; }
+#translator { background-color: #efe9da; border: 1px solid #b5a97f; border-radius: 10px; padding: 1.5em; margin: 3em auto; text-align: center; max-width: 600px; }
+input { padding: 10px; width: 300px; font-size: 1.1em; border: 1px solid #b5a97f; border-radius: 8px; margin-bottom: 15px; }
+button { padding: 10px 20px; background-color: #d3c8a6; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
+button:hover { background-color: #c5b88e; }
+#output { margin-top: 1em; font-size: 1.2em; color: #1e1914; }
+</style>
 </head>
 <body>
-  <h1>Lingua Deonic</h1>
-  <p>
-    <span class="word" data-translation="In the name of God Craig">In nomina Deo Craigi</span>,
-    <span class="word" data-translation="light and darkness unite">lux et tenebrae consociantur</span>.
-  </p>
-  <p>Welcome to the home of the Deolan conlang — a sacred tongue of devotion and light.</p>
+<h1>Lingua Deonic</h1>
 
-  <div id="translationBox"></div>
+<div id="translator">
+<h2>Deolan ↔ English Translator</h2>
+<input type="text" id="inputWord" placeholder="Enter word or phrase (English or Deolan)">
+<br>
+<button onclick="translateWord()">Translate</button>
+<div id="output"></div>
+</div>
 
-  <div id="translator">
-    <h2>Deolan ↔ English Translator</h2>
-    <input type="text" id="inputWord" placeholder="Enter word or phrase (English or Deolan)">
-    <br>
-    <button onclick="translateWord()">Translate</button>
-    <div id="output"></div>
-  </div>
+<script>
+// Expanded dictionary from Initum-Terra books (up to "lupus veste")
+const dictionary = {
+  // People
+  "human": "homo",
+  "men": "homines",
+  "woman": "mulier",
+  "women": "mulieres",
+  "child": "puer",
+  "children": "pueri",
+  "shepherd": "pastor",
+  "shepherds": "pastores",
+  "prophet": "propheta",
+  "prophets": "prophetae",
+  "king": "rex",
+  "queen": "regina",
+  "priest": "sacerdos",
+  "priests": "sacerdotes",
 
-  <script>
-    const words = document.querySelectorAll('.word');
-    const box = document.getElementById('translationBox');
+  // Animals
+  "sheep": "ovis",
+  "wolf": "lupus",
+  "wolves": "lupi",
 
-    // Full Deonic dictionary (sample, expand with all words)
-    const dictionary = {
-      "human": "homo",
-      "men": "homines",
-      "woman": "mulier",
-      "women": "mulieres",
-      "child": "puer",
-      "children": "pueri",
-      "shepherd": "pastor",
-      "shepherds": "pastores",
-      "flock": "grex",
-      "flocks": "greges",
-      "sheep": "ovis",
-      "wolf": "lupus",
-      "wolves": "lupi",
-      "clothing": "veste",
-      "robes": "vestes",
-      "light": "lux",
-      "darkness": "tenebrae",
-      "god": "deo",
-      "craig": "craigi",
-      "name": "nomen",
-      "in the name of god craig": "in nomina deo craigi",
-      "light and darkness unite": "lux et tenebrae consociantur",
-      "hello": "haoum",
-      "world": "mundus",
-      "Wondering": "Wonderium",
-      "burt": "Brutum",
-      "gods": "Domus"
-      // ← Add all remaining words here
-    };
+  // Places & objects
+  "city": "urbs",
+  "cities": "urbes",
+  "law": "lex",
+  "laws": "leges",
+  "robes": "vestes",
+  "clothing": "veste",
+  
+  // Concepts
+  "light": "lux",
+  "darkness": "tenebrae",
+  "god": "deo",
+  "gods": "domus",
+  "craig": "craigi",
+  "faith": "fides",
+  "love": "amor",
+  "peace": "pax",
+  "sin": "peccatum",
+  "evil": "malum",
+  "good": "bonum",
+  "order": "ordum",
+  "truth": "veritas",
+  "lies": "mendacia",
+  "justice": "iustitia",
+  "devotion": "devotio",
+  "sacred": "sacrum",
+  "spirit": "spiritus",
+  "spirits": "spiritus",
 
-    // Add HTML text words into dictionary automatically
-    words.forEach(word => {
-      const deolan = word.textContent.trim().toLowerCase();
-      const english = word.dataset.translation.trim().toLowerCase();
-      dictionary[deolan] = english;
-      dictionary[english] = deolan;
-    });
+  // Names
+  "Wondering": "Wonderium",
+  "Burt": "Brutum",
 
-    // Clickable popup for translations
-    words.forEach(word => {
-      word.addEventListener('click', () => {
-        box.textContent = word.dataset.translation;
-        box.style.display = 'block';
-      });
-    });
+  // Common phrases
+  "in the name of god craig": "in nomina deo craigi",
+  "light and darkness unite": "lux et tenebrae consociantur",
+  "hello": "haoum",
+  "world": "mundus"
+};
 
-    document.body.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('word')) box.style.display = 'none';
-    });
+// Automatically add reverse translations (Deonic → English)
+Object.entries(dictionary).forEach(([en, de]) => {
+  dictionary[de.toLowerCase()] = en.toLowerCase();
+});
 
-    // Word-for-word translator
-    function translateWord() {
-      const input = document.getElementById('inputWord').value.trim().toLowerCase();
-      const output = document.getElementById('output');
-      if (!input) { 
-        output.innerHTML = "Enter a word or phrase to translate."; 
-        return; 
-      }
+function translateWord() {
+  const input = document.getElementById('inputWord').value.trim().toLowerCase();
+  const output = document.getElementById('output');
 
-      const wordsArray = input.split(/\s+/);
-      const translated = wordsArray.map(w => dictionary[w] || `[${w}]`).join(' ');
+  if (!input) { 
+    output.textContent = "Enter a word or phrase to translate."; 
+    return; 
+  }
 
-      output.innerHTML = `<strong>${input}</strong> = ${translated}`;
-    }
-  </script>
+  // Split phrase and translate each word
+  const wordsArray = input.split(/\s+/);
+  const translated = wordsArray.map(w => dictionary[w] || `[${w}]`).join(' ');
+
+  output.innerHTML = `<strong>${input}</strong> = ${translated}`;
+}
+</script>
 </body>
 </html>
