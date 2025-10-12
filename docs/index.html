@@ -39,7 +39,7 @@
     const words = document.querySelectorAll('.word');
     const box = document.getElementById('translationBox');
 
-    // Full Deonic dictionary (sample with key words, expand with ALL words from Initum-Terra books)
+    // Full Deonic dictionary (sample, expand with all words)
     const dictionary = {
       "human": "homo",
       "men": "homines",
@@ -63,42 +63,12 @@
       "name": "nomen",
       "in the name of god craig": "in nomina deo craigi",
       "light and darkness unite": "lux et tenebrae consociantur",
-      "hello": "salve",
+      "hello": "haoum",
       "world": "mundus",
-      "peace": "pax",
-      "faith": "fides",
-      "love": "amor",
-      "sin": "peccatum",
-      "evil": "malum",
-      "good": "bonum",
-      "order": "ordum",
-      "city": "urbs",
-      "cities": "urbes",
-      "law": "lex",
-      "laws": "leges",
-      "prophet": "propheta",
-      "prophets": "prophetae",
-      "enemy": "inimicus",
-      "enemies": "inimici",
-      "truth": "veritas",
-      "lies": "mendacia",
-      "justice": "iustitia",
-      "king": "rex",
-      "queen": "regina",
-      "priest": "sacerdos",
-      "priests": "sacerdotes",
-      "devotion": "devotio",
-      "sacred": "sacrum",
-      "spirit": "spiritus",
-      "spirits": "spiritus",
-      "wolf": "lupus",
-      "veste": "clothing"
-      "hello": "haoum"
-      "Wondering": "Wonderium"
-      "burt": "Brutum"
-      "god": "Deo"
+      "Wondering": "Wonderium",
+      "burt": "Brutum",
       "gods": "Domus"
-      // ← Continue adding ALL remaining words from Initum-Terra books here
+      // ← Add all remaining words here
     };
 
     // Add HTML text words into dictionary automatically
@@ -130,15 +100,11 @@
         return; 
       }
 
-      // Split phrase and translate each word
       const wordsArray = input.split(/\s+/);
       const translated = wordsArray.map(w => dictionary[w] || `[${w}]`).join(' ');
 
       output.innerHTML = `<strong>${input}</strong> = ${translated}`;
     }
-  </script>
-</body>
-</html>
   </script>
 </body>
 </html>
