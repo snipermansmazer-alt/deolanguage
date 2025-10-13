@@ -16,81 +16,12 @@ button:hover{background-color:#c5b88e;}
 <body>
 <h1>Lingua Deonic — Translator</h1>
 <div id="translatorBox">
-<textarea id="inputWord" placeholder="Paste text, chapter, or book here..."></textarea><br>
-<button onclick="translateText()">Translate</button>
-<div id="output"></div>
+  <textarea id="inputWord" placeholder="Paste text, chapter, or book here..."></textarea><br>
+  <button id="translateBtn">Translate</button>
+  <div id="output"></div>
 </div>
 
-<script>
-const dictionary={
-"abandon":"relinquo","able":"potens","about":"de","above":"super","absolve":"absolvium",
-"accept":"suscipio","across":"trans","act":"agere","adam":"adam","after":"post","again":"iterum",
-"against":"contra","age":"aetatis","air":"aeris","all":"omnis","alone":"solus","altar":"altare",
-"always":"semper","am":"sum","among":"inter","ancient":"antiquus","angel":"angelus","anger":"ira",
-"animal":"animalis","answer":"responsum","appear":"apparere","apple":"pomum","armor":"lorica",
-"army":"exercitus","art":"ars","ascend":"ascendio","ash":"cinis","ask":"rogare","at":"ad",
-"attack":"impetum","author":"auctor","authority":"ordinatus","awake":"expergiscor",
-"baby":"infans","bad":"malus","battle":"pugna","beautiful":"pulcher","because":"quia",
-"become":"fieri","before":"ante","beginning":"initium","believe":"credere","beneath":"sub",
-"bird":"avis","birth":"nativitas","black":"niger","blessing":"benedictio","blood":"sanguis",
-"body":"caro","book":"liber","bread":"panis","brother":"frater","build":"aedificare","burn":"ardere",
-"by":"per","call":"vocare","camp":"castra","can":"possum","care":"cura","carry":"portare","cause":"causa",
-"change":"mutare","chapel":"capella","charity":"caritas","child":"puer","city":"civitas",
-"clean":"mundus","clear":"clarus","cloud":"nubes","cold":"frigidus","come":"venire",
-"command":"imperium","companion":"socius","complete":"completus","confess":"confiteri",
-"conflict":"discordia","conquer":"vincere","convert":"convertere","cool":"gelidus",
-"courage":"virtus","create":"creare","creation":"initum","craig":"craigus","cry":"plorare",
-"cult":"cultus","curse":"maledictum","dark":"obscurus","darkness":"tenebrae","danger":"periculum",
-"day":"dies","dead":"mortuus","death":"mori","dear":"carus","defend":"defendere",
-"deliver":"liberare","deny":"negare","descend":"descendere","desire":"desiderium","destiny":"fatum",
-"destroy":"delere","devil":"daemon","die":"mori","divine":"divinus","doctor":"medicus",
-"dog":"canis","door":"porta","doubt":"dubium","dream":"somnium","drink":"bibere","dust":"pulvis",
-"duty":"officium","earth":"terra","east":"oriens","eat":"edere","education":"doctrina",
-"elder":"senior","element":"elementum","embrace":"amplecti","empire":"imperium","empty":"vacuum",
-"end":"finis","enemy":"inimicus","energy":"virtus","enjoy":"gaudere","enter":"intrare","envy":"invidia",
-"equal":"aequalis","escape":"fugere","eternal":"aeternus","evening":"vespera","every":"omnis",
-"evil":"malum","example":"exemplum","exist":"exsistere","eye":"oculus","face":"facies","faith":"fidelis",
-"fall":"cadere","false":"falsus","family":"familia","father":"pater","fear":"timor","feast":"convivium",
-"feel":"sentire","field":"ager","fight":"pugnare","fire":"ignis","first":"primus","fish":"piscis",
-"flame":"flamma","flesh":"caro","flower":"flos","follow":"sequi","food":"cibus","for":"pro",
-"forest":"silva","forgive":"remittere","form":"forma","freedom":"libertas","friend":"amicus",
-"from":"ex","fruit":"fructus","future":"futurum","gain":"lucrum","garden":"hortus","gate":"porta",
-"gift":"donum","give":"dare","god":"deo","gold":"aurum","good":"bonus","grace":"gratia",
-"grand":"magnus","grave":"sepulcrum","great":"magnus","green":"viridis","grow":"crescere",
-"guard":"custos","guide":"ducere","habit":"consuetudo","hand":"manus","happy":"laetus",
-"hard":"durus","harvest":"messis","hate":"odium","have":"habere","he":"ille","head":"caput",
-"heal":"sanare","heart":"cor","heaven":"caelum","help":"auxilium","here":"hic","hero":"heros",
-"hide":"celare","high":"altus","hill":"collis","him":"eum","his":"suus","holy":"sanctus",
-"home":"domus","hope":"spes","horse":"equus","hour":"hora","house":"domus","how":"quomodo",
-"human":"homo","humble":"humilis","hunger":"fames","hunt":"venari","hymn":"carmen",
-"idea":"notio","idol":"idolum","if":"si","image":"imago","immortal":"immortalis","important":"magnus",
-"in":"in","increase":"augmentum","initum":"initum","initum-terra":"initum-terra",
-"innocent":"innocens","inspire":"inspirare","iron":"ferrum","is":"est","island":"insula","it":"id",
-"jewel":"gemma","journey":"iter","joy":"gaudium","judge":"iudex","judgment":"iudicium",
-"just":"iustus","justice":"iustitia","keep":"servare","kill":"occidere","kind":"benignus",
-"king":"rex","kingdom":"regnum","knowledge":"scientia","labor":"laborare","lady":"domina",
-"lake":"lacus","land":"terra","language":"lingua","large":"magnus","last":"ultimus",
-"law":"lex","lead":"ducere","learn":"discere","leave":"relinquere","legend":"fabula",
-"life":"vita","light":"lux","like":"similis","lion":"leo","listen":"audire","live":"vivere",
-"lord":"dominus","lose":"amittere","love":"amor","luck":"fortuna","luesium":"luesium",
-"machine":"machina","mad":"insanus","magic":"magia","main":"primarius","make":"facere",
-"man":"homo","mankind":"humanitas","many":"multi","marriage":"nuptiae","master":"magister",
-"matter":"materia","meal":"cibus","measure":"mensura","meat":"caro","memory":"memoria"
-};
-
-// reverse map
-for(const k in dictionary){const v=dictionary[k];if(!dictionary[v])dictionary[v]=k;}
-
-// translator
-function translateText(){
-  const input=document.getElementById('inputWord').value.trim();
-  const output=document.getElementById('output');
-  if(!input){output.innerHTML="Please enter or paste text to translate.";return;}
-  const cleaned=input.replace(/[.,!?;:()"']/g,"").replace(/\r?\n|\r/g,"\n");
-  const words=cleaned.split(/\s+/);
-  const translated=words.map(w=>dictionary[w.toLowerCase()]||`[${w}]`).join(" ");
-  output.innerHTML=`<strong>Original Text:</strong>\n${input}\n\n<strong>Deonic Translation:</strong>\n${translated}`;
-}
-</script>
+<!-- Load external JS -->
+<script src="translator.js"></script>
 </body>
 </html>
