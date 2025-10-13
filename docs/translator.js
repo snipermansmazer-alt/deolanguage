@@ -133,7 +133,16 @@ const dictionary={
   "wrong":"iniustion",
 
   "year":"annusion","yes":"ita-vere","you":"tu","young":"iuvenion","your":"tuus",
-  "yekumalesh":"yekumalesh","zeal":"zelion","zealous":"zelation"
+  "yekumalesh":"yekumalesh","zeal":"zelion","zealous":"zelation",
+  "a":"unon","an":"unon","the":"ilion","of":"de","and":"et","for":"pro","on":"super",
+  "in":"intra","at":"ad","to":"ad","by":"per","from":"ex","with":"cum","into":"intro",
+  "was":"erat","were":"erant","been":"fuit","being":"esseon","had":"habuit","has":"habet",
+  "is":"est","are":"sunt","that":"quod","those":"illos","these":"illos","this":"hic",
+  "not":"non","no":"non","but":"sed","then":"tunc","if":"si","so":"ita","because":"quia",
+  "as":"ut","do":"facere","did":"fecit","done":"factum","made":"feceron","their":"eorum",
+  "there":"ibi","here":"hic","they":"illi","them":"eos","who":"quision","whom":"quem",
+  "which":"quod","when":"quando","where":"ubi","how":"quomodo","why":"cur","been":"fuit",
+  "have":"habere","has":"habet","did":"fecit","will":"voluntasion","shall":"erit"
 };
 
 // Translator
