@@ -62,7 +62,7 @@ const dictionary = {
 ];
 
 // =========================
-// SMART AUTO-DEONICIZATION (STABLE)
+// SMART AUTO-DEONICIZATION (STABLE WITH MEMORY)
 // =========================
 function isSacredWord(w){ return sacred.has(w.toLowerCase()); }
 
@@ -73,58 +73,52 @@ function matchCasing(base, original){
   return base;
 }
 
-function chooseStableEnding(word, list){
-  const code = [...word].reduce((a,c)=>a+c.charCodeAt(0),0);
-  return list[code % list.length];
-}
+const translationMemory = new Map();
 
 function deonicizeUnknown(w){
   const low = w.toLowerCase();
   if (isSacredWord(low)) return w;
   if (/^\d+([.,:/-]\d+)*$/.test(low)) return w;
+  if (translationMemory.has(low)) return translationMemory.get(low);
 
   let stem = low.replace(/^un-/, "in-").replace(/^re-/, "re-");
 
-  if (/ies$/.test(stem)) return stem.replace(/ies$/, "ionae");
-  if (/ves$/.test(stem)) return stem.replace(/ves$/, "ae");
-  if (/xes$|ches$|shes$|sses$|zes$/.test(stem)) return stem.replace(/es$/, "ae");
-  if (/s$/.test(stem) && !/ss$/.test(stem)) return stem.replace(/s$/, "ae");
+  if (/ies$/.test(stem)) stem = stem.replace(/ies$/, "ionae");
+  else if (/ves$/.test(stem)) stem = stem.replace(/ves$/, "ae");
+  else if (/xes$|ches$|shes$|sses$|zes$/.test(stem)) stem = stem.replace(/es$/, "ae");
+  else if (/s$/.test(stem) && !/ss$/.test(stem)) stem = stem.replace(/s$/, "ae");
 
-  if (/ied$/.test(stem)) return stem.replace(/ied$/, "ium");
-  if (/ed$/.test(stem)) return stem.replace(/ed$/, "um");
-  if (/ing$/.test(stem)) return stem.replace(/ing$/, "erion");
+  if (/ied$/.test(stem)) stem = stem.replace(/ied$/, "ium");
+  else if (/ed$/.test(stem)) stem = stem.replace(/ed$/, "um");
+  else if (/ing$/.test(stem)) stem = stem.replace(/ing$/, "erion");
 
-  if (/ly$/.test(stem)) return stem.replace(/ly$/, "lither");
-  if (/ness$/.test(stem)) return stem.replace(/ness$/, "tudo");
-  if (/ment$/.test(stem)) return stem.replace(/ment$/, "mentum");
-  if (/tion$/.test(stem)) return stem.replace(/tion$/, "tio");
-  if (/sion$/.test(stem)) return stem.replace(/sion$/, "sio");
-  if (/ship$/.test(stem)) return stem.replace(/ship$/, "atus");
-  if (/est$/.test(stem)) return stem.replace(/est$/, "issim");
-  if (/er$/.test(stem)) return stem.replace(/er$/, "ior");
+  if (/ly$/.test(stem)) stem = stem.replace(/ly$/, "lither");
+  else if (/ness$/.test(stem)) stem = stem.replace(/ness$/, "tudo");
+  else if (/ment$/.test(stem)) stem = stem.replace(/ment$/, "mentum");
+  else if (/tion$/.test(stem)) stem = stem.replace(/tion$/, "tio");
+  else if (/sion$/.test(stem)) stem = stem.replace(/sion$/, "sio");
+  else if (/ship$/.test(stem)) stem = stem.replace(/ship$/, "atus");
+  else if (/est$/.test(stem)) stem = stem.replace(/est$/, "issim");
+  else if (/er$/.test(stem)) stem = stem.replace(/er$/, "ior");
 
   const isVerb = /e$|ate$|ify$|ise$|ize$|ing$|ed$/.test(stem);
   const isAdj  = /ful$|less$|ous$|ive$|al$|ic$|ant$|ent$|ary$/.test(stem);
   const isNoun = /tion$|ment$|ness$|dom$|hood$|ship$|ity$/.test(stem);
 
+  const code = [...low].reduce((a,c)=>a+c.charCodeAt(0),0);
+  const choose = (list)=> list[code % list.length];
+
   let ending = "on";
-  if (isVerb) {
-    const verbEndings = ["on","um","erion","areon","eron","arion","uron"];
-    ending = chooseStableEnding(stem, verbEndings);
-  } else if (isAdj) {
-    const adjEndings = ["alis","ior","ar","en","eus","ilis","or"];
-    ending = chooseStableEnding(stem, adjEndings);
-  } else if (isNoun) {
-    const nounEndings = ["on","um","is","ae","or","en","ion","amentum"];
-    ending = chooseStableEnding(stem, nounEndings);
-  } else {
-    const generic = ["on","um","is","ae","or","en","ion","ar","al"];
-    ending = chooseStableEnding(stem, generic);
-  }
+  if (isVerb) ending = choose(["on","um","erion","areon","eron","arion","uron"]);
+  else if (isAdj) ending = choose(["alis","ior","ar","en","eus","ilis","or"]);
+  else if (isNoun) ending = choose(["on","um","is","ae","or","en","ion","amentum"]);
+  else ending = choose(["on","um","is","ae","or","en","ion","ar","al"]);
 
   if (/[aeiou]$/.test(stem) && /^[aeiou]/.test(ending)) ending = ending.slice(1);
 
-  return stem + ending;
+  const result = stem + ending;
+  translationMemory.set(low, result);
+  return result;
 }
 
 // =========================
