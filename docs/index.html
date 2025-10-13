@@ -1,27 +1,267 @@
 <!DOCTYPE html>
 <html lang="la-x-liturgica">
 <head>
-<meta charset="UTF-8">
-<title>Lingua Deonic — Translator (Book Mode)</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lingua Deonic — Nuclear Translator</title>
 <style>
-body{font-family:'Garamond',serif;background:#f9f8f6;color:#1e1b16;padding:2rem;line-height:1.6;}
-h1{text-align:center;font-variant:small-caps;}
-#translatorBox{max-width:800px;margin:0 auto;text-align:center;}
-textarea{width:90%;height:200px;font-size:1.1em;border-radius:8px;border:1px solid #b5a97f;padding:10px;resize:vertical;background-color:#fffaf3;}
-button{padding:10px 25px;font-size:1.1em;border-radius:8px;border:none;background-color:#d3c8a6;cursor:pointer;margin-top:10px;}
-button:hover{background-color:#c5b88e;}
-#output{margin-top:25px;font-size:1.2em;line-height:1.6;text-align:left;background:#f1ede5;padding:15px;border-radius:10px;white-space:pre-wrap;}
+  :root{
+    --bg:#f9f8f6; --ink:#1e1b16; --panel:#f1ede5; --accent:#d3c8a6; --accent-2:#c5b88e;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --serif: "Garamond", "Times New Roman", serif;
+  }
+  body{font-family:var(--serif); background:var(--bg); color:var(--ink); padding:2rem; line-height:1.6;}
+  h1{ text-align:center; font-variant:small-caps; margin-top:0; }
+  #translatorBox{ max-width:900px; margin:0 auto; text-align:center; }
+  textarea{ width:95%; height:220px; font-size:1.05rem; border-radius:10px; border:1px solid #b5a97f;
+            padding:12px; resize:vertical; background:#fffaf3; }
+  button{ padding:10px 20px; font-size:1.05rem; border-radius:10px; border:none;
+          background:var(--accent); cursor:pointer; margin:10px 6px 0; }
+  button:hover{ background:var(--accent-2); }
+  .panel{ margin:22px auto 0; text-align:left; background:var(--panel); padding:16px; border-radius:12px; }
+  #output, #meta { white-space:pre-wrap; }
+  .mono{ font-family:var(--mono); font-size:.95rem; }
+  details{ margin-top:10px; }
+  summary{ cursor:pointer; }
+  .badge{ display:inline-block; padding:.1rem .5rem; border-radius:999px; background:#e8e1cf; margin-left:.35rem; font-size:.8rem; }
 </style>
 </head>
 <body>
-<h1>Lingua Deonic — Translator</h1>
+
+<h1>Lingua Deonic — Translator (Nuclear)</h1>
+
 <div id="translatorBox">
-  <textarea id="inputWord" placeholder="Paste text, chapter, or book here..."></textarea><br>
+  <textarea id="inputWord" placeholder="Paste a chapter or whole book and press Translate…"></textarea><br/>
   <button id="translateBtn">Translate</button>
-  <div id="output"></div>
+  <button id="copyBtn" title="Copy Deonic translation">Copy</button>
+
+  <div id="output" class="panel mono"></div>
+  <div id="meta" class="panel mono"></div>
+
+  <details class="panel">
+    <summary>Show dictionary hit/miss stats <span id="statsBadge" class="badge">ready</span></summary>
+    <div id="stats" class="mono"></div>
+  </details>
 </div>
 
-<!-- Load external JS -->
-<script src="translator.js"></script>
+<script>
+// =========================
+// 1) CORE DICTIONARY (cleaned, deduped, grammar included)
+// Sacred names are PRESERVED exactly (no deonicization).
+// =========================
+const sacred = new Set([
+  "deo","craigus","luesium","initum","initum-terra","obscurus-silva","yekumalesh","wonderium","coelum","mori"
+]);
+
+// Base dictionary (hybrid: Latin roots + Deonicized endings where helpful).
+// NOTE: No duplicate KEYS; VALUES can differ freely since we map EN->DEO only.
+const dictionary = {
+  // Articles / particles / auxiliaries / connectors
+  "a":"unon","an":"unon","the":"ilion","of":"de","and":"et","for":"pro","on":"super","in":"intra","at":"ad","to":"ad","by":"per","from":"ex","with":"cum","into":"intro",
+  "was":"erat","were":"erant","been":"fuit","being":"esseon","had":"habuit","has":"habet","is":"est","are":"sunt","be":"esse",
+  "that":"quod","those":"illos","these":"illos","this":"hic","not":"non","no":"non","but":"sed","then":"tunc","if":"si","so":"ita","because":"quia","as":"ut","do":"facere","did":"fecit","done":"factum","made":"feceron",
+  "their":"eorum","there":"ibi","here":"hic","they":"illi","them":"eos","who":"quision","whom":"quem","which":"quod","when":"quando","where":"ubi","how":"quomodo","why":"cur","will":"voluntasion","shall":"erit",
+  "i":"ego","you":"tu","he":"ille","she":"illa","we":"nos","me":"me","him":"eum","her":"eam","us":"nos","my":"meus","your":"tuus","our":"noster","his":"suus","its":"suus","their-pron":"eorum",
+
+  // High-frequency narrative words
+  "book":"liber","world":"mundus","earth":"terra","heaven":"caelum","sky":"caelion","hell":"infernum","hell-spiritual":"gehennon",
+  "man":"hominon","human":"homo","humanity":"humanitasion","men":"homines","woman":"muliera","women":"mulierae","child":"puer","children":"pueri",
+  "city":"civiton","cities":"civitonae","island":"insulion","mountain":"monsion","river":"flumenon","desert":"deserton","garden":"hortusion","sand":"arena","sandstone":"arenarion",
+  "star":"stellion","stars":"stellae","moon":"lunon","sun":"solion",
+  "dragon":"draco","powerful":"potenson","strong":"fortion","valiant":"fortilis","brave":"coraeon",
+  "spirit":"spiritus","spirits":"spirituae","demon":"daemon","demons":"daemonae",
+  "angel":"angelion","prophet":"propheton","prophets":"prophetae","shepherd":"pastorion","sheep":"ovision",
+  "sword":"gladion","iron":"ferrum","gate":"porton","door":"porta","temple":"templum",
+  "fire":"ignis","flame":"flamion","storm":"tempestation","light":"lux","dark":"obscurion","darkness":"tenebrae","dark-evil":"tenebrion",
+  "food":"cibus","meal":"cibion","meat":"carune","bread":"panion","fruit":"fructusion","cocoa":"cocoa",
+  "blood":"sanguion","flesh":"caro","bone":"os","bones":"ossa",
+  "law":"lex","laws":"leges","order":"ordon","justice":"iustition","grace":"gratia","faith":"fidelis","salvation":"salvation",
+
+  // Actions (a decent core to cover stories)
+  "create":"creareon","created":"creavion","destroy":"deleron","build":"aedificareon","conquer":"vincereon","transform":"mutareon","transformed":"mutation",
+  "warn":"monereon","warned":"monuion","protect":"protegeron","protecting":"protegenson","save":"servareon","redeem":"redimeron","judge":"iudexion",
+  "speak":"loqueron","say":"diceron","call":"vocareon","ask":"rogareon","answer":"respondereon","cry":"clamareon","cried":"clamavion","plead":"supplicareon",
+  "search":"quaereron","find":"invenireon","found":"invenition","seek":"peteron","reach":"attingerion","enter":"intrareon","leave":"relinquereon","flee":"fugeron",
+  "walk":"ambularion","go":"ireon","come":"venireon","return":"redituson","ascend":"ascendereon","descend":"descendereon",
+  "fight":"pugnareon","slay":"interficerion","kill":"occideron","steal":"furareon","stealing":"furarion","pillage":"diriperon",
+  "worship":"adorarion","pray":"orareon","sacrifice":"sacrificion","fast":"ieiunareon","repent":"paeniteron","believe":"credereon","doubt":"dubitation",
+  "live":"viveron","die":"mori","let":"permittereon","give":"dareon","take":"caperon","hold":"teneron","bind":"ligareon","break":"frangereon",
+
+  // Descriptions
+  "holy":"sanction","sacred":"sacron","good":"beneon","evil":"malon","ancient":"antiqion","new":"novion","great":"magnion","grand":"grandion",
+  "gray":"canon","gray-hue":"canus-color","cold":"frigidon","hot":"calidion","incredibly":"mirabiliter","proud":"superbion",
+  "eternal":"aeternion","eternal-curse":"aeternion-malediction","infinite":"infiniton",
+  "alive":"vivon","dead":"mortuon","fallen":"lapsion","former":"priorion","future":"futurion","present-adj":"praesension",
+
+  // Nouns used in your books
+  "creation":"initum","initum-terra":"initum-terra","obscurus-silva":"obscurus-silva","yekumalesh":"yekumalesh",
+  "coelum":"coelum","mori":"mori","luesium":"luesium","craig":"craigus","deo":"deo",
+
+  // More narrative helpers
+  "rule":"regulion","ruler":"rectorion","king":"rex","queen":"reginion",
+  "war":"bellion","battle":"pugnion","army":"exercition","soldier":"milesion",
+  "friend":"amicus","friends":"amiciae","enemy":"inimicion","enemies":"inimiciae",
+  "path":"semiton","road":"viaron","way":"via","place":"locusion","house":"domion","home":"domus",
+  "speech":"sermo","voice":"voxion","tongue":"linguion","heart":"cor","hearts":"corda",
+  "day":"dies","days":"diesae","night":"noxion","time":"tempusion","year":"annusion",
+  "island":"insulion","abyss":"abyssus","pits":"foveae","deepest":"altissimus"
+};
+
+// =========================
+// 2) AUTO-DEONICIZATION ENGINE
+// Turns any unknown word into a Deonic form (keeps casing & punctuation).
+// Rules: plurals, -ed, -ing, -ly, -ness, -ment, -tion, comp/superlatives,
+// numbers, capitalization, sacred-preserve, and simple name passthrough.
+// =========================
+
+function isSacredWord(w){
+  const low = w.toLowerCase();
+  return sacred.has(low);
+}
+
+// Return word with same capitalization pattern as original
+function matchCasing(base, original){
+  if (original.toUpperCase() === original) return base.toUpperCase();        // ALLCAPS
+  if (original[0] && original[0] === original[0].toUpperCase())              // Capitalized
+    return base.charAt(0).toUpperCase()+base.slice(1);
+  return base; // lower
+}
+
+function deonicizeUnknown(w){
+  const low = w.toLowerCase();
+
+  // sacred passthrough
+  if (isSacredWord(low)) return w;
+
+  // numbers or mixed digits: return as-is
+  if (/^\d+([.,:/-]\d+)*$/.test(low)) return w;
+
+  // Basic stems (English → Latin-ish) before suffixing
+  let stem = low
+    .replace(/^un-/, "in-")     // un- → in- (roughly Latin-ish)
+    .replace(/^re-/, "re-");
+
+  // Handle plurals
+  if (/ies$/.test(stem)) { stem = stem.replace(/ies$/, "ionae"); return stem; }
+  if (/ves$/.test(stem)) { stem = stem.replace(/ves$/, "fonae"); return stem; } // wolves→wolf→lupae (approx) but keep generic
+  if (/xes$|ches$|shes$|sses$|zes$/.test(stem)) { stem = stem.replace(/es$/, "ae"); return stem; }
+  if (/s$/.test(stem) && !/ss$/.test(stem)) { stem = stem.replace(/s$/, "ae"); return stem; }
+
+  // Verb tenses
+  if (/ied$/.test(stem)) { stem = stem.replace(/ied$/, "ion"); return stem; }      // tried→trion
+  if (/ed$/.test(stem))  { stem = stem.replace(/ed$/, "on");  return stem; }       // called→callon
+  if (/ing$/.test(stem)) { stem = stem.replace(/ing$/, "ion"); return stem; }      // calling→callion
+
+  // Adverbs & derivations
+  if (/ly$/.test(stem))     { stem = stem.replace(/ly$/, "liter"); return stem; }  // truly→truliter
+  if (/ness$/.test(stem))   { stem = stem.replace(/ness$/, "tudo"); return stem; } // darkness→darktudo
+  if (/ment$/.test(stem))   { stem = stem.replace(/ment$/, "mentum"); return stem; }
+  if (/tion$/.test(stem))   { stem = stem.replace(/tion$/, "tio"); return stem; }  // salvation→salvatio
+  if (/sion$/.test(stem))   { stem = stem.replace(/sion$/, "sio"); return stem; }  // conversion→conversio
+  if (/ship$/.test(stem))   { stem = stem.replace(/ship$/, "atus"); return stem; } // fellowship→fellowatus
+
+  // Comparative/superlative
+  if (/est$/.test(stem)) { stem = stem.replace(/est$/, "issim"); return stem; }    // greatest→greatissim
+  if (/er$/.test(stem))  { stem = stem.replace(/er$/, "ior");    return stem; }    // greater→greatior
+
+  // Fallback Deonic ending
+  return stem + "ion";
+}
+
+// Tokenizer that keeps punctuation so we can reassemble text exactly
+function tokenizeWithDelims(str){
+  // split into word / non-word chunks
+  return str.match(/[A-Za-z]+|\d+|[^A-Za-z\d]+/g) || [];
+}
+
+function translateChunk(token, seenAuto, seenDict){
+  // Words only: A-Za-z (numbers pass through)
+  if (!/[A-Za-z]/.test(token)) return token;
+
+  const low = token.toLowerCase();
+
+  // Sacred passthrough
+  if (isSacredWord(low)) return matchCasing(low, token);
+
+  // Dictionary hit?
+  if (dictionary.hasOwnProperty(low)) {
+    seenDict.add(low);
+    return matchCasing(dictionary[low], token);
+  }
+
+  // Auto-deonicize unknown words
+  const deon = deonicizeUnknown(token);
+  seenAuto.add(low);
+  return matchCasing(deon, token);
+}
+
+// =========================
+// 3) CONTROLLER / UI
+// =========================
+document.getElementById("translateBtn").addEventListener("click", translateText);
+document.getElementById("copyBtn").addEventListener("click", copyOutput);
+
+function translateText(){
+  const input = document.getElementById("inputWord").value || "";
+  const outEl  = document.getElementById("output");
+  const metaEl = document.getElementById("meta");
+  const statsEl = document.getElementById("stats");
+  const statsBadge = document.getElementById("statsBadge");
+
+  if (!input.trim()){
+    outEl.textContent = "Please enter or paste text to translate.";
+    metaEl.textContent = "";
+    statsEl.textContent = "";
+    statsBadge.textContent = "empty";
+    return;
+  }
+
+  const tokens = tokenizeWithDelims(input);
+  const seenAuto = new Set();
+  const seenDict = new Set();
+
+  const translated = tokens.map(t => translateChunk(t, seenAuto, seenDict)).join("");
+
+  outEl.textContent =
+`Deonic Translation:
+${translated}`;
+
+  // Stats & meta
+  const autoCount = seenAuto.size;
+  const dictCount = seenDict.size;
+  const totalWords = (input.match(/[A-Za-z]+/g) || []).length;
+
+  metaEl.textContent =
+`Summary:
+- Total tokens (word-like): ${totalWords}
+- Dictionary hits: ${dictCount}
+- Auto-Deonicized: ${autoCount}
+- Sacred preserved: ${[...sacred].join(", ")}`;
+
+  statsEl.textContent =
+`Dictionary hits (first 100): 
+${truncateList([...seenDict].sort(), 100).join(", ")}
+
+Auto-Deonicized words (first 100):
+${truncateList([...seenAuto].sort(), 100).join(", ")}`;
+
+  statsBadge.textContent = `${dictCount} dict · ${autoCount} auto`;
+}
+
+function truncateList(arr, n){
+  if (arr.length <= n) return arr;
+  return arr.slice(0,n).concat([`…(+${arr.length-n})`]);
+}
+
+function copyOutput(){
+  const outEl = document.getElementById("output");
+  const text = outEl.textContent || "";
+  if (!text.trim()) return;
+  navigator.clipboard.writeText(text).then(()=> {
+    alert("Deonic translation copied to clipboard.");
+  });
+}
+</script>
+
 </body>
 </html>
