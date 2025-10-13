@@ -20,6 +20,7 @@ button:hover{background-color:#c5b88e;}
 <button onclick="translateText()">Translate</button>
 <div id="output"></div>
 </div>
+
 <script>
 const dictionary={
 "abandon":"relinquo","able":"potens","about":"de","above":"super","absolve":"absolvium",
@@ -71,91 +72,24 @@ const dictionary={
 "lake":"lacus","land":"terra","language":"lingua","large":"magnus","last":"ultimus",
 "law":"lex","lead":"ducere","learn":"discere","leave":"relinquere","legend":"fabula",
 "life":"vita","light":"lux","like":"similis","lion":"leo","listen":"audire","live":"vivere",
-"lord":"dominus","lose":"amittere","love":"amor","luck":"fortuna","luesium":"luesium"
-  "machine":"machina","mad":"insanus","magic":"magia","main":"primarius","make":"facere",
+"lord":"dominus","lose":"amittere","love":"amor","luck":"fortuna","luesium":"luesium",
+"machine":"machina","mad":"insanus","magic":"magia","main":"primarius","make":"facere",
 "man":"homo","mankind":"humanitas","many":"multi","marriage":"nuptiae","master":"magister",
-"matter":"materia","meal":"cibus","measure":"mensura","meat":"caro","memory":"memoria",
-"message":"nuntium","metal":"metallum","middle":"medius","might":"potestas","mind":"mens",
-"mine":"meum","mirror":"speculum","miss":"desiderare","moon":"luna","moral":"moralis",
-"more":"plus","morning":"mane","mori":"mori","mortal":"mortalis","mountain":"mons",
-"move":"movere","mox-esse":"mox-esse","much":"multum","music":"musica","must":"debere",
-"mystery":"mysterium",
-"name":"nomen","nation":"gens","natural":"naturalis","nature":"natura","near":"prope",
-"need":"necessitas","never":"numquam","new":"novus","next":"proximum","night":"nox",
-"no":"non","north":"septentrio","not":"non","nothing":"nihil","now":"nunc","number":"numerus",
-"oak":"quercus","oath":"ius","obedience":"oboedientia","obey":"oboedire","object":"res",
-"obscurus-silva":"obscurus-silva","ocean":"oceanus","offer":"offerre","office":"officium",
-"often":"saepe","old":"vetus","once":"semel","one":"unus","only":"tantum","open":"aperire",
-"order":"ordo","ordum":"ordum","other":"alius","our":"noster","out":"foris","outside":"extra",
-"over":"super","own":"proprius","ox":"bos","pain":"dolor","palace":"palatium","parent":"parens",
-"part":"pars","pass":"transire","past":"praeteritum","pastoris":"pastoris","path":"semita",
-"patience":"patientia","peace":"pax","people":"populus","perfect":"perfectus","perhaps":"fortasse",
-"person":"persona","place":"locus","plant":"planta","play":"ludere","pleasure":"voluptas",
-"poor":"pauper","possess":"possidere","possible":"possibilis","power":"potestas",
-"pray":"orare","prayer":"oratio","preach":"praedicare","precious":"pretiosus",
-"prepare":"parare","presence":"praesentia","priest":"sacerdos","priests":"sacerdotes",
-"prince":"princeps","principle":"principium","problem":"problema","promise":"promissio",
-"prophecy":"prophetia","prophet":"propheta","prophets":"prophetae","protect":"protegere",
-"pure":"purus","purpose":"propositum","push":"pellere","put":"ponere",
-"queen":"regina","question":"quaestio","quiet":"quietus","race":"gens","rain":"pluvia",
-"raise":"levare","rare":"rarus","reach":"attingere","read":"legere","ready":"paratus",
-"reason":"ratio","receive":"recipere","redeem":"redimere","red":"ruber","reign":"regnare",
-"rejoice":"gaudere","remain":"manere","remember":"meminisse","repent":"paenitere",
-"repentance":"paenitentia","rescue":"eripere","rest":"requies","restore":"restituere",
-"return":"reditus","reveal":"revelare","reward":"praemium","rich":"dives","right":"rectus",
-"righteous":"iustus","river":"flumen","road":"via","rock":"petra","rose":"rosa",
-"rule":"regula","run":"currere","ruin":"ruina","ruler":"rector","rumor":"fama",
-"sacred":"sacrum","sacrifice":"sacrificium","safe":"tutus","saint":"sanctus",
-"salvation":"salvatio","same":"idem","sand":"arena","save":"servare","say":"dicere",
-"school":"schola","sea":"mare","search":"quaerere","season":"tempus","second":"secundus",
-"secret":"secretum","see":"videre","seed":"semen","seek":"petere","self":"ipse",
-"send":"mittere","servant":"servus","serve":"servire","seven":"septem","shadow":"umbra",
-"shall":"erit","shape":"forma","she":"illa","sheep":"ovis","shepherd":"pastor",
-"shield":"scutum","shine":"splendere","ship":"navis","short":"brevis","show":"monstrare",
-"side":"latus","sight":"visus","sign":"signum","silence":"silentium","silva":"silva",
-"silver":"argentum","sin":"peccatum","sing":"canere","sister":"soror","six":"sex",
-"sky":"caelum","sleep":"dormire","slow":"lentus","small":"parvus","snow":"nix",
-"so":"ita","soft":"mollis","soldier":"miles","son":"filius","song":"canticum",
-"sorrow":"dolor","soul":"anima","speak":"loqui","spirit":"spiritus","spiritual":"spiritualis",
-"star":"stella","start":"incipere","stone":"lapis","storm":"tempestas","strong":"fortis",
-"sun":"sol","sweet":"dulcis","sword":"gladius","system":"ordo","table":"mensa",
-"take":"capere","teach":"docere","teacher":"doctor","tear":"lacrima","tell":"narrare",
-"temple":"templum","ten":"decem","terrible":"terribilis","terra":"terra","thank":"gratias-agere",
-"thanks":"gratiae","thanksgiving":"eulogia","their":"eorum","them":"eos","then":"tunc",
-"there":"ibi","they":"illi","thing":"res","think":"cogitare","this":"hic","thou":"tu",
-"thought":"cogitatio","three":"tres","through":"per","time":"tempus","to":"ad","today":"hodie",
-"together":"simul","tongue":"lingua","too":"nimis","town":"urbs","tree":"arbor","true":"verus",
-"trust":"fiducia","truth":"veritas","turn":"vertere","two":"duo","under":"sub",
-"understand":"intellegere","union":"unio","unite":"unire","until":"donec","up":"sur",
-"upon":"super","urge":"instigare","use":"uti","useful":"utilis","usher":"ostiarius",
-"valley":"vallis","value":"valor","vanish":"evanescere","vengeance":"ultio",
-"verse":"versus","very":"valde","victory":"victoria","village":"vicus","virtue":"virtus",
-"vision":"visio","visit":"visitare","voice":"vox","void":"vacuum","volcano":"ignimons",
-"vow":"votum","vulture":"vultur","vita":"vita","walk":"ambulare","wall":"murus","want":"velle",
-"war":"bellum","warm":"calidus","water":"aqua","way":"via","we":"nos","weak":"debilis",
-"weapon":"arma","west":"occidens","what":"quid","when":"quando","where":"ubi",
-"which":"quod","white":"albus","who":"quis","whole":"totus","why":"cur","wicked":"malignus",
-"wild":"ferus","will":"voluntas","wind":"ventus","wisdom":"sapientia","wise":"sapiens",
-"woman":"mulier","wonder":"miraculum","wondering":"wonderium","word":"verbum",
-"work":"opus","world":"mundus","worship":"adorare","worth":"dignitas","write":"scribere",
-"wrong":"iniustus","xeno":"alienus","xylos":"lignum","year":"annus","yes":"ita-vere",
-"you":"tu","young":"iuvenis","your":"tuus","yourself":"teipsum","yekumalesh":"yekumalesh",
-"zeal":"zelus","zealous":"zelatus","zenith":"zenithus","zero":"nihilum",
-"zombie":"mortivivus","zone":"zona","zion":"caelum-mons","zephyr":"favonius"
-});
+"matter":"materia","meal":"cibus","measure":"mensura","meat":"caro","memory":"memoria"
+};
 
-// Reverse map
+// reverse map
 for(const k in dictionary){const v=dictionary[k];if(!dictionary[v])dictionary[v]=k;}
 
-// Translator
+// translator
 function translateText(){
- const input=document.getElementById('inputWord').value.trim();
- const output=document.getElementById('output');
- if(!input){output.innerHTML="Please enter or paste text to translate.";return;}
- const cleaned=input.replace(/[.,!?;:()"']/g,"").replace(/\r?\n|\r/g,"\n");
- const words=cleaned.split(/\s+/);
- const translated=words.map(w=>dictionary[w.toLowerCase()]||`[${w}]`).join(" ");
- output.innerHTML=`<strong>Original Text:</strong>\n${input}\n\n<strong>Deonic Translation:</strong>\n${translated}`;
+  const input=document.getElementById('inputWord').value.trim();
+  const output=document.getElementById('output');
+  if(!input){output.innerHTML="Please enter or paste text to translate.";return;}
+  const cleaned=input.replace(/[.,!?;:()"']/g,"").replace(/\r?\n|\r/g,"\n");
+  const words=cleaned.split(/\s+/);
+  const translated=words.map(w=>dictionary[w.toLowerCase()]||`[${w}]`).join(" ");
+  output.innerHTML=`<strong>Original Text:</strong>\n${input}\n\n<strong>Deonic Translation:</strong>\n${translated}`;
 }
 </script>
 </body>
