@@ -59,10 +59,10 @@ const dictionary = {
   "book":"liber","world":"mundus","earth":"terra","heaven":"caelum","man":"hominon","human":"homo","humanity":"humanitasion",
   "dragon":"draco","spirit":"spiritus","demon":"daemon","angel":"angelion","sword":"gladion","iron":"ferrum","fire":"ignis","light":"lux","dark":"obscurion",
   "food":"cibus","blood":"sanguion","flesh":"caro","faith":"fidelis","salvation":"salvation","creation":"initum","craig":"craigus","deo":"deo"
-};
+];
 
 // =========================
-// SMART AUTO-DEONICIZATION
+// SMART AUTO-DEONICIZATION (STABLE)
 // =========================
 function isSacredWord(w){ return sacred.has(w.toLowerCase()); }
 
@@ -73,6 +73,11 @@ function matchCasing(base, original){
   return base;
 }
 
+function chooseStableEnding(word, list){
+  const code = [...word].reduce((a,c)=>a+c.charCodeAt(0),0);
+  return list[code % list.length];
+}
+
 function deonicizeUnknown(w){
   const low = w.toLowerCase();
   if (isSacredWord(low)) return w;
@@ -80,18 +85,15 @@ function deonicizeUnknown(w){
 
   let stem = low.replace(/^un-/, "in-").replace(/^re-/, "re-");
 
-  // Plural patterns
   if (/ies$/.test(stem)) return stem.replace(/ies$/, "ionae");
   if (/ves$/.test(stem)) return stem.replace(/ves$/, "ae");
   if (/xes$|ches$|shes$|sses$|zes$/.test(stem)) return stem.replace(/es$/, "ae");
   if (/s$/.test(stem) && !/ss$/.test(stem)) return stem.replace(/s$/, "ae");
 
-  // Verb patterns
   if (/ied$/.test(stem)) return stem.replace(/ied$/, "ium");
   if (/ed$/.test(stem)) return stem.replace(/ed$/, "um");
   if (/ing$/.test(stem)) return stem.replace(/ing$/, "erion");
 
-  // Adjective / adverb roots
   if (/ly$/.test(stem)) return stem.replace(/ly$/, "lither");
   if (/ness$/.test(stem)) return stem.replace(/ness$/, "tudo");
   if (/ment$/.test(stem)) return stem.replace(/ment$/, "mentum");
@@ -101,7 +103,6 @@ function deonicizeUnknown(w){
   if (/est$/.test(stem)) return stem.replace(/est$/, "issim");
   if (/er$/.test(stem)) return stem.replace(/er$/, "ior");
 
-  // Determine likely word type heuristically
   const isVerb = /e$|ate$|ify$|ise$|ize$|ing$|ed$/.test(stem);
   const isAdj  = /ful$|less$|ous$|ive$|al$|ic$|ant$|ent$|ary$/.test(stem);
   const isNoun = /tion$|ment$|ness$|dom$|hood$|ship$|ity$/.test(stem);
@@ -109,19 +110,18 @@ function deonicizeUnknown(w){
   let ending = "on";
   if (isVerb) {
     const verbEndings = ["on","um","erion","areon","eron","arion","uron"];
-    ending = verbEndings[Math.floor(Math.random()*verbEndings.length)];
+    ending = chooseStableEnding(stem, verbEndings);
   } else if (isAdj) {
     const adjEndings = ["alis","ior","ar","en","eus","ilis","or"];
-    ending = adjEndings[Math.floor(Math.random()*adjEndings.length)];
+    ending = chooseStableEnding(stem, adjEndings);
   } else if (isNoun) {
     const nounEndings = ["on","um","is","ae","or","en","ion","amentum"];
-    ending = nounEndings[Math.floor(Math.random()*nounEndings.length)];
+    ending = chooseStableEnding(stem, nounEndings);
   } else {
     const generic = ["on","um","is","ae","or","en","ion","ar","al"];
-    ending = generic[Math.floor(Math.random()*generic.length)];
+    ending = chooseStableEnding(stem, generic);
   }
 
-  // Avoid vowel collisions
   if (/[aeiou]$/.test(stem) && /^[aeiou]/.test(ending)) ending = ending.slice(1);
 
   return stem + ending;
