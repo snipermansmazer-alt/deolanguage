@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Lingua Deonic — Translator</title>
+<title>Lingua Deonic — EN ↔ Deonics Translator</title>
 <style>
   :root{
     --bg:#f9f8f6; --ink:#1e1b16; --panel:#f1ede5; --accent:#d3c8a6; --accent-2:#c5b88e;
@@ -12,7 +12,7 @@
   }
   body{font-family:var(--serif); background:var(--bg); color:var(--ink); padding:2rem; line-height:1.6;}
   h1{ text-align:center; font-variant:small-caps; margin-top:0; }
-  #translatorBox{ max-width:900px; margin:0 auto; text-align:center; }
+  #translatorBox{ max-width:1000px; margin:0 auto; text-align:center; }
   textarea{ width:95%; height:220px; font-size:1.05rem; border-radius:10px; border:1px solid #b5a97f;
             padding:12px; resize:vertical; background:#fffaf3; }
   button{ padding:10px 20px; font-size:1.05rem; border-radius:10px; border:none;
@@ -20,6 +20,8 @@
   button:hover{ background:var(--accent-2); }
   .panel{ margin:22px auto 0; text-align:left; background:var(--panel); padding:16px; border-radius:12px; }
   #output, #meta { white-space:pre-wrap; }
+  .row{ display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; }
+  select{ padding:8px 10px; border-radius:10px; border:1px solid #b5a97f; background:#fffaf3; }
   .mono{ font-family:var(--mono); font-size:.95rem; }
   details{ margin-top:10px; }
   summary{ cursor:pointer; }
@@ -28,18 +30,29 @@
 </head>
 <body>
 
-<h1>Lingua Deonic — Translator</h1>
+<h1>Lingua Deonic — EN ↔ Deonics Translator</h1>
 
 <div id="translatorBox">
-  <textarea id="inputWord" placeholder="Paste a chapter or whole book and press Translate…"></textarea><br/>
-  <button id="translateBtn">Translate</button>
-  <button id="copyBtn" title="Copy Deonic translation">Copy</button>
+  <div class="row">
+    <textarea id="inputText" placeholder="Paste a chapter or whole book and press Translate…"></textarea>
+  </div>
+  <div class="row">
+    <label for="direction" class="mono">Direction:</label>
+    <select id="direction" class="mono">
+      <option value="EN2DEO">English → Deonics</option>
+      <option value="DEO2EN">Deonics → English</option>
+    </select>
+    <button id="translateBtn">Translate</button>
+    <button id="swapBtn" title="Swap input/output">Swap</button>
+    <button id="copyBtn" title="Copy output">Copy</button>
+    <button id="downloadBtn" title="Download output as .txt">Download</button>
+  </div>
 
   <div id="output" class="panel mono"></div>
   <div id="meta" class="panel mono"></div>
 
   <details class="panel">
-    <summary>Show dictionary hit/miss stats <span id="statsBadge" class="badge">ready</span></summary>
+    <summary>Show dictionary & heuristic stats <span id="statsBadge" class="badge">ready</span></summary>
     <div id="stats" class="mono"></div>
   </details>
 </div>
@@ -52,157 +65,313 @@ const sacred = new Set([
   "deo","craigus","luesium","initum","initum-terra","obscurus-silva","yekumalesh","wonderium","coelum","mori"
 ]);
 
-const dictionary = {
+// Base bilingual dictionary (extend freely). EN keys; values are Deonic.
+const en2deo = {
   "a":"unon","the":"ilion","of":"de","and":"et","for":"pro","on":"super","in":"intra","at":"ad","to":"ad","by":"per","from":"ex","with":"cum","into":"intro",
   "was":"erat","were":"erant","been":"fuit","being":"esseon","had":"habuit","has":"habet","is":"est","are":"sunt","be":"esse",
-  "that":"quod","those":"illos","these":"illos","this":"hic","not":"non","no":"non","but":"sed","then":"tunc","if":"si","so":"ita","because":"quia","as":"ut","do":"facere","did":"fecit","done":"factum","made":"feceron",
+  "that":"quod","those":"illi","these":"illi","this":"hic","not":"non","no":"non","but":"sed","then":"tunc","if":"si","so":"ita","because":"quia","as":"ut","do":"facere","did":"fecit","done":"factum","made":"feceron",
   "book":"liber","world":"mundus","earth":"terra","heaven":"caelum","man":"hominon","human":"homo","humanity":"humanitasion",
   "dragon":"draco","spirit":"spiritus","demon":"daemon","angel":"angelion","sword":"gladion","iron":"ferrum","fire":"ignis","light":"lux","dark":"obscurion",
-  "food":"cibus","blood":"sanguion","flesh":"caro","faith":"fidelis","salvation":"salvation","creation":"initum","craig":"craigus","deo":"deo"
+  "food":"cibus","blood":"sanguion","flesh":"caro","faith":"fidelis","salvation":"salvation","creation":"initum","craig":"craigus","deo":"deo",
+  "wondering":"wonderium","city":"urbs","people":"populus"
 };
 
+// Reverse map for direct lexical lookups (Deonics → English)
+const deo2en = Object.create(null);
+for (const [k,v] of Object.entries(en2deo)) {
+  // prefer first come; don't overwrite if collision
+  if (!deo2en[v]) deo2en[v] = k;
+}
+
 // =========================
-// SMART AUTO-DEONICIZATION (STABLE WITH MEMORY)
+// PERSISTENT TRANSLATION MEMORY
+// =========================
+const MEM_EN2DEO = "deonic.mem.en2deo.v2";
+const MEM_DEO2EN = "deonic.mem.deo2en.v2";
+const memEN2DEO = new Map(loadMem(MEM_EN2DEO));
+const memDEO2EN = new Map(loadMem(MEM_DEO2EN));
+function loadMem(key){ try{ const raw = localStorage.getItem(key); return raw? Object.entries(JSON.parse(raw)) : []; }catch{return []} }
+function saveMem(key, map){ try{ localStorage.setItem(key, JSON.stringify(Object.fromEntries(map.entries())));}catch{} }
+
+// =========================
+// SHARED UTILS
 // =========================
 function isSacredWord(w){ return sacred.has(w.toLowerCase()); }
-
 function matchCasing(base, original){
   if (original.toUpperCase() === original) return base.toUpperCase();
   if (original[0] && original[0] === original[0].toUpperCase())
     return base.charAt(0).toUpperCase()+base.slice(1);
   return base;
 }
+function tokenizeWithDelims(str){ return str.match(/[A-Za-z]+|\d+|[^A-Za-z\d]+/g) || []; }
+function truncateList(arr, n){ return arr.length<=n? arr : arr.slice(0,n).concat([`…(+${arr.length-n})`]); }
 
-const translationMemory = new Map();
+// =========================
+// SMARTER EN → DEO ("Auto-Deonicization 2.0")
+//  - richer suffix handling
+//  - simple stems for negatives/prefixes
+//  - variety endings with part-of-speech guess
+//  - memory-backed
+// =========================
+function en2deoUnknown(word){
+  const low = word.toLowerCase();
+  if (isSacredWord(low)) return word; // preserve sacred
+  if (/^\d+([.,:/-]\d+)*$/.test(low)) return word; // numbers
+  if (memEN2DEO.has(low)) return memEN2DEO.get(low);
 
-function deonicizeUnknown(w){
-  const low = w.toLowerCase();
-  if (isSacredWord(low)) return w;
-  if (/^\d+([.,:/-]\d+)*$/.test(low)) return w;
-  if (translationMemory.has(low)) return translationMemory.get(low);
+  // prefix normalize (un-, re-, pre-, trans-, inter-)
+  let stem = low
+    .replace(/^un-/, "in-")
+    .replace(/^re-/, "re-")
+    .replace(/^pre-/, "prae-")
+    .replace(/^trans-/, "trans-")
+    .replace(/^inter-/, "inter-");
 
-  let stem = low.replace(/^un-/, "in-").replace(/^re-/, "re-");
-
-  if (/ies$/.test(stem)) stem = stem.replace(/ies$/, "ionae");
-  else if (/ves$/.test(stem)) stem = stem.replace(/ves$/, "ae");
-  else if (/xes$|ches$|shes$|sses$|zes$/.test(stem)) stem = stem.replace(/es$/, "ae");
+  // plural → singular & common inflections
+  if (/ies$/.test(stem)) stem = stem.replace(/ies$/, "ionae"); // city→ citionae (heuristic)
+  else if (/ves$/.test(stem)) stem = stem.replace(/ves$/, "ae"); // wolves→wolae
+  else if (/(xes|ches|shes|sses|zes)$/.test(stem)) stem = stem.replace(/es$/, "ae");
   else if (/s$/.test(stem) && !/ss$/.test(stem)) stem = stem.replace(/s$/, "ae");
 
-  if (/ied$/.test(stem)) stem = stem.replace(/ied$/, "ium");
+  // verbs/adjs/nouns
+  if (/ied$/.test(stem)) stem = stem.replace(/ied$/, "ium"); // tried→ trium
   else if (/ed$/.test(stem)) stem = stem.replace(/ed$/, "um");
   else if (/ing$/.test(stem)) stem = stem.replace(/ing$/, "erion");
 
   if (/ly$/.test(stem)) stem = stem.replace(/ly$/, "lither");
-  else if (/ness$/.test(stem)) stem = stem.replace(/ness$/, "tudo");
-  else if (/ment$/.test(stem)) stem = stem.replace(/ment$/, "mentum");
-  else if (/tion$/.test(stem)) stem = stem.replace(/tion$/, "tio");
-  else if (/sion$/.test(stem)) stem = stem.replace(/sion$/, "sio");
-  else if (/ship$/.test(stem)) stem = stem.replace(/ship$/, "atus");
-  else if (/est$/.test(stem)) stem = stem.replace(/est$/, "issim");
-  else if (/er$/.test(stem)) stem = stem.replace(/er$/, "ior");
+  if (/ness$/.test(stem)) stem = stem.replace(/ness$/, "tudo");
+  if (/ment$/.test(stem)) stem = stem.replace(/ment$/, "mentum");
+  if (/tion$/.test(stem)) stem = stem.replace(/tion$/, "tio");
+  if (/sion$/.test(stem)) stem = stem.replace(/sion$/, "sio");
+  if (/ship$/.test(stem)) stem = stem.replace(/ship$/, "atus");
+  if (/est$/.test(stem)) stem = stem.replace(/est$/, "issim");
+  if (/er$/.test(stem)) stem = stem.replace(/er$/, "ior");
+  if (/ful$/.test(stem)) stem = stem.replace(/ful$/, "osus"); // helpful→help osus
+  if (/less$/.test(stem)) stem = stem.replace(/less$/, "carens");
+  if (/ive$/.test(stem)) stem = stem.replace(/ive$/, "ivus");
+  if (/ous$/.test(stem)) stem = stem.replace(/ous$/, "osus");
+  if (/al$/.test(stem)) stem = stem.replace(/al$/, "alis");
 
-  const isVerb = /e$|ate$|ify$|ise$|ize$|ing$|ed$/.test(stem);
-  const isAdj  = /ful$|less$|ous$|ive$|al$|ic$|ant$|ent$|ary$/.test(stem);
-  const isNoun = /tion$|ment$|ness$|dom$|hood$|ship$|ity$/.test(stem);
+  // part-of-speech guess for final ending variety
+  const isVerb = /(e|ate|ify|ise|ize|ing|ed|um|erion)$/.test(stem);
+  const isAdj  = /(ful|less|ous|ive|al|ic|ant|ent|ary|alis|ior|eus|ilis|or)$/.test(stem);
+  const isNoun = /(tion|tio|sion|sio|ment|mentum|ness|tudo|dom|hood|ship|ity|itas)$/.test(stem);
 
   const code = [...low].reduce((a,c)=>a+c.charCodeAt(0),0);
-  const choose = (list)=> list[code % list.length];
+  const choose = (list)=> list[(code>>>1) % list.length];
 
   let ending = "on";
   if (isVerb) ending = choose(["on","um","erion","areon","eron","arion","uron"]);
   else if (isAdj) ending = choose(["alis","ior","ar","en","eus","ilis","or"]);
-  else if (isNoun) ending = choose(["on","um","is","ae","or","en","ion","amentum"]);
+  else if (isNoun) ending = choose(["on","um","is","ae","or","en","ion","amentum","al","ar"]);
   else ending = choose(["on","um","is","ae","or","en","ion","ar","al"]);
 
   if (/[aeiou]$/.test(stem) && /^[aeiou]/.test(ending)) ending = ending.slice(1);
 
-  const result = stem + ending;
-  translationMemory.set(low, result);
-  return result;
+  const out = stem + ending;
+  memEN2DEO.set(low, out);
+  saveMem(MEM_EN2DEO, memEN2DEO);
+  return out;
+}
+
+function en2deoToken(token, seenDict, seenAuto){
+  if (!/[A-Za-z]/.test(token)) return token;
+  const low = token.toLowerCase();
+  if (isSacredWord(low)) return matchCasing(low, token);
+  if (en2deo.hasOwnProperty(low)) { seenDict.add(low); return matchCasing(en2deo[low], token); }
+  const deon = en2deoUnknown(token);
+  seenAuto.add(low);
+  return matchCasing(deon, token);
+}
+
+// =========================
+// NEW: DEONICS → ENGLISH (Detranslator)
+//  Heuristics reverse common Deonic endings to plausible English forms.
+//  Strategy: try direct dictionary hit → memory → rule set that produces candidate list → pick best via simple scoring.
+// =========================
+const REV_RULES = [
+  // [regex, replacement, tag]
+  [/amentum$/,"ment","noun"],
+  [/mentum$/,"ment","noun"],
+  [/tudo$/,"ness","noun"],
+  [/lither$/,"ly","adv"],
+  [/erion$/,"ing","verb"],
+  [/ium$/,"ied","verb"], // heuristic for -ied past
+  [/um$/,"ed","verb"],
+  [/tio$/,"tion","noun"],
+  [/sio$/,"sion","noun"],
+  [/ivus$/,"ive","adj"],
+  [/osus$/,"ous","adj"],
+  [/carens$/,"less","adj"],
+  [/alis$/,"al","adj"],
+  [/ilis$/,"ile","adj"],
+  [/eus$/,"ous","adj"],
+  [/issim$/,"est","sup"],
+  [/ior$/,"er","comp"],
+  [/ae$/,"s","plural"],
+  [/ionae$/,"ies","plural"],
+  [/ion$/,"ion","noun"],
+  [/en$/,"en","gen"],
+  [/or$/,"or","noun"],
+  [/ar$/,"ar","noun"],
+  [/al$/,"al","adj"],
+  [/on$/,"","neutral"],
+  [/um$/,"","neutral"],
+  [/is$/,"","neutral"],
+  [/en$/,"","neutral"],
+];
+
+// lightweight English preference scoring: prefer outputs that look Englishy
+function scoreEnglishy(w){
+  let s = 0;
+  if (/e$|ed$|ing$|ly$|tion$|ment$|ness$|ous$|ive$|al$|or$|er$|s$|y$/.test(w)) s+=3;
+  if (/[^aeiou]e$/.test(w)) s+=1; // silent-e pattern
+  if (/^[a-z]{2,}$/.test(w)) s+=1;
+  if (w.length>=3 && w.length<=15) s+=1;
+  if (/[^aeiou]{3}/.test(w)) s-=1; // too many consonants
+  if (/[^a-z]/.test(w)) s-=2; // bad chars
+  return s;
+}
+
+function deo2enUnknown(word){
+  const low = word.toLowerCase();
+  if (isSacredWord(low)) return word; // preserve sacred names
+  if (/^\d+([.,:/-]\d+)*$/.test(low)) return word;
+  if (memDEO2EN.has(low)) return memDEO2EN.get(low);
+
+  let base = low;
+  // normalize some Deonic prefixes back
+  base = base.replace(/^prae-/, "pre-").replace(/^in-/, "un-");
+
+  const candidates = new Set();
+  candidates.add(base); // raw
+
+  // apply every reverse rule once
+  for (const [re, rep] of REV_RULES) {
+    if (re.test(base)) candidates.add(base.replace(re, rep));
+  }
+
+  // special combos
+  if (/ae$/.test(base) && !/eae$/.test(base)) candidates.add(base.replace(/ae$/, "s"));
+  if (/ionae$/.test(base)) candidates.add(base.replace(/ionae$/, "ies"));
+
+  // prefer direct dictionary reverse if available
+  if (deo2en[low]) candidates.add(deo2en[low]);
+
+  // choose best by score
+  let best = null, bestScore = -1e9;
+  for (const c of candidates) {
+    const sc = scoreEnglishy(c);
+    if (sc > bestScore) { best = c; bestScore = sc; }
+  }
+
+  const out = best || base;
+  memDEO2EN.set(low, out);
+  saveMem(MEM_DEO2EN, memDEO2EN);
+  return out;
+}
+
+function deo2enToken(token, seenDict, seenAuto){
+  if (!/[A-Za-z]/.test(token)) return token;
+  const low = token.toLowerCase();
+  if (isSacredWord(low)) return matchCasing(low, token);
+  // exact lexicon reverse
+  if (deo2en.hasOwnProperty(low)) { seenDict.add(low); return matchCasing(deo2en[low], token); }
+  const eng = deo2enUnknown(token);
+  seenAuto.add(low);
+  return matchCasing(eng, token);
 }
 
 // =========================
 // CONTROLLER / UI
 // =========================
+const inputEl = document.getElementById("inputText");
+const outEl   = document.getElementById("output");
+const metaEl  = document.getElementById("meta");
+const statsEl = document.getElementById("stats");
+const statsBadge = document.getElementById("statsBadge");
+const dirEl = document.getElementById("direction");
+
 document.getElementById("translateBtn").addEventListener("click", translateText);
+
+document.getElementById("swapBtn").addEventListener("click", ()=>{
+  const oldOut = outEl.textContent.replace(/^.*?\n/, ""); // strip heading line
+  inputEl.value = oldOut.trim();
+  dirEl.value = (dirEl.value === 'EN2DEO')? 'DEO2EN' : 'EN2DEO';
+  translateText();
+});
+
 document.getElementById("copyBtn").addEventListener("click", copyOutput);
 
-function tokenizeWithDelims(str){
-  return str.match(/[A-Za-z]+|\d+|[^A-Za-z\d]+/g) || [];
-}
+document.getElementById("downloadBtn").addEventListener("click", ()=>{
+  const text = outEl.textContent || "";
+  if (!text.trim()) return;
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (dirEl.value==='EN2DEO'? 'deonics.txt':'english.txt');
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 
-function translateChunk(token, seenAuto, seenDict){
-  if (!/[A-Za-z]/.test(token)) return token;
-  const low = token.toLowerCase();
-  if (isSacredWord(low)) return matchCasing(low, token);
-  if (dictionary.hasOwnProperty(low)) {
-    seenDict.add(low);
-    return matchCasing(dictionary[low], token);
-  }
-  const deon = deonicizeUnknown(token);
-  seenAuto.add(low);
-  return matchCasing(deon, token);
-}
+inputEl.addEventListener("keydown", (e)=>{
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); translateText(); }
+  if (e.key === "Escape") { inputEl.value = ""; resetPanels(); }
+});
+
+function resetPanels(){ outEl.textContent = ""; metaEl.textContent = ""; statsEl.textContent = ""; statsBadge.textContent = "ready"; }
 
 function translateText(){
-  const input = document.getElementById("inputWord").value || "";
-  const outEl  = document.getElementById("output");
-  const metaEl = document.getElementById("meta");
-  const statsEl = document.getElementById("stats");
-  const statsBadge = document.getElementById("statsBadge");
-
-  if (!input.trim()){
-    outEl.textContent = "Please enter or paste text to translate.";
-    metaEl.textContent = "";
-    statsEl.textContent = "";
-    statsBadge.textContent = "empty";
-    return;
-  }
+  const input = inputEl.value || "";
+  if (!input.trim()) { outEl.textContent = "Please enter or paste text to translate."; metaEl.textContent = ""; statsEl.textContent = ""; statsBadge.textContent = "empty"; return; }
 
   const tokens = tokenizeWithDelims(input);
   const seenAuto = new Set();
   const seenDict = new Set();
+  const direction = dirEl.value;
 
-  const translated = tokens.map(t => translateChunk(t, seenAuto, seenDict)).join("");
+  const translated = tokens.map(t => direction==='EN2DEO' ? en2deoToken(t, seenDict, seenAuto) : deo2enToken(t, seenDict, seenAuto)).join("");
 
-  outEl.textContent =
-`Deonic Translation:
-${translated}`;
+  outEl.textContent = (direction==='EN2DEO' ? 'Deonic Translation:\n' : 'English Translation:\n') + translated;
 
   const autoCount = seenAuto.size;
   const dictCount = seenDict.size;
   const totalWords = (input.match(/[A-Za-z]+/g) || []).length;
 
   metaEl.textContent =
-`Summary:
-- Total tokens (word-like): ${totalWords}
-- Dictionary hits: ${dictCount}
-- Auto-Deonicized: ${autoCount}
-- Sacred preserved: ${[...sacred].join(", ")}`;
+`Summary:\n- Direction: ${direction==='EN2DEO' ? 'English → Deonics' : 'Deonics → English'}\n- Total tokens (word-like): ${totalWords}\n- Lexicon hits: ${dictCount}\n- Heuristic conversions: ${autoCount}\n- Sacred preserved: ${[...sacred].join(', ')}`;
 
   statsEl.textContent =
-`Dictionary hits (first 100): 
-${truncateList([...seenDict].sort(), 100).join(", ")}
+`Lexicon hits (first 100): \n${truncateList([...seenDict].sort(), 100).join(', ')}\n\nHeuristic words (first 100):\n${truncateList([...seenAuto].sort(), 100).join(', ')}`;
 
-Auto-Deonicized words (first 100):
-${truncateList([...seenAuto].sort(), 100).join(", ")}`;
+  statsBadge.textContent = `${dictCount} lex · ${autoCount} heur`;
 
-  statsBadge.textContent = `${dictCount} dict · ${autoCount} auto`;
-}
-
-function truncateList(arr, n){
-  if (arr.length <= n) return arr;
-  return arr.slice(0,n).concat([`…(+${arr.length-n})`]);
+  // shareable state
+  try { const pack = encodeURIComponent(input.slice(0, 5000)); history.replaceState(null, "", `#${direction}|text=${pack}`); } catch {}
 }
 
 function copyOutput(){
-  const outEl = document.getElementById("output");
   const text = outEl.textContent || "";
   if (!text.trim()) return;
-  navigator.clipboard.writeText(text).then(()=> {
-    alert("Deonic translation copied to clipboard.");
-  });
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(()=> alert("Output copied to clipboard.")).catch(fallbackCopy);
+  } else fallbackCopy();
 }
+function fallbackCopy(){
+  const ta = document.createElement("textarea");
+  ta.value = outEl.textContent || ""; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+  alert("Copied (fallback).");
+}
+
+// bootstrap from URL hash if present
+(function initFromHash(){
+  const m = location.hash.match(/^#(EN2DEO|DEO2EN)\|text=([^]*)$/);
+  if (m) {
+    dirEl.value = m[1];
+    try { inputEl.value = decodeURIComponent(m[2]); } catch { /* ignore */ }
+    translateText();
+  }
+})();
 </script>
 </body>
 </html>
