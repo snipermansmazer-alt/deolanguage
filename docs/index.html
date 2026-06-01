@@ -302,8 +302,10 @@ function deo2enToken(token, seenDict, seenAuto){
   if (!/[A-Za-z]/.test(token)) return token;
   const low = token.toLowerCase();
   if (isSacredWord(low)) return matchCasing(low, token);
-  // exact lexicon reverse
-  if (deo2en.hasOwnProperty(low)) { seenDict.add(low); return matchCasing(deo2en[low], token); }
+  if (Object.prototype.hasOwnProperty.call(deo2en, low)) {
+    seenDict.add(low);
+    return matchCasing(deo2en[low], token);
+  }
   const eng = deo2enUnknown(token);
   seenAuto.add(low);
   return matchCasing(eng, token);
