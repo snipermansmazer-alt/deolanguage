@@ -178,7 +178,7 @@ function en2deoUnknown(word){
 
   if (isSacredWord(low)) return word;
   if (/^\d+([.,:/-]\d+)*$/.test(low)) return word;
-  if (memEN2DEO.has(low)) return memEN2DEO.get(low);
+// if (memEN2DEO.has(low)) return memEN2DEO.get(low);
 
   const root = getRoot(low);
   let out = deonicPattern(root, low);
