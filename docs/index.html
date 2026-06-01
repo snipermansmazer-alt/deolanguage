@@ -132,55 +132,28 @@ function getRoot(word){
     .replace(/less$/,"")
     .replace(/ous$/,"")
     .replace(/ive$/,"")
-    .replace(/al$/,"");
+    .replace(/al$/,"")
+    .replace(/change/g,"kren")
+    .replace(/faith/g,"bhid")
+    .replace(/light/g,"leuk")
+    .replace(/dark/g,"dhum")
+    .replace(/sword/g,"kard")
+    .replace(/people/g,"teut")
+    .replace(/city/g,"gard");
 
-  let consonants = low.replace(/[aeiou]/g,"");
+  let root = low
+    .replace(/ch/g,"k")
+    .replace(/th/g,"d")
+    .replace(/sh/g,"s")
+    .replace(/ph/g,"b")
+    .replace(/qu/g,"kw")
+    .replace(/[aeiou]/g,"");
 
-  if (consonants.length < 3) {
-    consonants = (consonants + low.replace(/[^aeiou]/g,"")).slice(0,3);
+  if (root.length < 3) {
+    root = (root + "hwr").slice(0,3);
   }
 
-  consonants = consonants.padEnd(3,"h");
-
-  return consonants.slice(0,3);
-}
-
-function deonicPattern(root, word){
-  const [a,b,c] = root;
-
-  const patterns = [
-    `${a}e${b}os`,
-    `${a}r${b}on`,
-    `${a}ei${b}us`,
-    `${a}${b}tor`,
-    `${a}eu${b}om`,
-    `${a}r${b}es`,
-    `${a}o${b}ar`,
-    `${a}ei${b}or`
-  ];
-
-  return stablePick(word, patterns);
-}
-
-function en2deoUnknown(word){
-  const low = word.toLowerCase();
-
-  if (isSacredWord(low)) return word;
-  if (/^\d+([.,:/-]\d+)*$/.test(low)) return word;
-  if (memEN2DEO.has(low)) return memEN2DEO.get(low);
-
-  const root = getRoot(low);
-
-  let out = deonicPattern(root, low);
-
-  if (/s$/.test(low) && !/ss$/.test(low)) out += "oi";
-  if (/ed$/.test(low)) out += "ta";
-  if (/ing$/.test(low)) out += "nti";
-
-  memEN2DEO.set(low, out);
-  saveMem(MEM_EN2DEO, memEN2DEO);
-
-  return out;
+  return root.slice(0,3);
 }
 
 function en2deoToken(token, seenDict, seenAuto){
