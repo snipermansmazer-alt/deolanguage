@@ -156,6 +156,43 @@ function getRoot(word){
   return root.slice(0,3);
 }
 
+function deonicPattern(root, word){
+  const [a,b,c] = root;
+
+  const patterns = [
+    `${a}e${b}os`,
+    `${a}a${b}ar`,
+    `${a}ei${b}os`,
+    `${a}${b}etor`,
+    `${a}eu${b}om`,
+    `${a}r${b}es`,
+    `${a}o${b}ar`,
+    `${a}ai${b}os`
+  ];
+
+  return stablePick(word, patterns);
+}
+
+function en2deoUnknown(word){
+  const low = word.toLowerCase();
+
+  if (isSacredWord(low)) return word;
+  if (/^\d+([.,:/-]\d+)*$/.test(low)) return word;
+  if (memEN2DEO.has(low)) return memEN2DEO.get(low);
+
+  const root = getRoot(low);
+  let out = deonicPattern(root, low);
+
+  if (/s$/.test(low) && !/ss$/.test(low)) out += "oi";
+  if (/ed$/.test(low)) out += "ta";
+  if (/ing$/.test(low)) out += "nti";
+
+  memEN2DEO.set(low, out);
+  saveMem(MEM_EN2DEO, memEN2DEO);
+
+  return out;
+}
+
 function en2deoToken(token, seenDict, seenAuto){
   if (!/[A-Za-z]/.test(token)) return token;
 
