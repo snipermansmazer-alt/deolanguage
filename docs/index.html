@@ -67,16 +67,15 @@ const sacred = new Set([
 
 // Base bilingual dictionary (extend freely). EN keys; values are Deonic.
 const en2deo = {
-  "a":"unon","the":"ilion","of":"de","and":"et","for":"pro","on":"super","in":"intra","at":"ad","to":"ad","by":"per","from":"ex","with":"cum","into":"intro",
-  "was":"erat","were":"erant","been":"fuit","being":"esseon","had":"habuit","has":"habet","is":"est","are":"sunt","be":"esse",
-  "that":"quod","those":"illi","these":"illi","this":"hic","not":"non","no":"non","but":"sed","then":"tunc","if":"si","so":"ita","because":"quia","as":"ut","do":"facere","did":"fecit","done":"factum","made":"feceron",
-  "book":"liber","world":"mundus","earth":"terra","heaven":"caelum","man":"hominon","human":"homo","humanity":"humanitasion",
-  "dragon":"draco","spirit":"spiritus","demon":"daemon","angel":"angelion","sword":"gladion","iron":"ferrum","fire":"ignis","light":"lux","dark":"obscurion",
-  "food":"cibus","blood":"sanguion","flesh":"caro","faith":"fidelis","salvation":"salvation","creation":"initum","craig":"craigus","deo":"deo",
-  "wondering":"wonderium","city":"urbs","people":"populus","one":"harci","two":"arlarh","three":"harfüm","four":"shealk","five":"domaun","six":"ploaush","seven":"kimaught",
-  "eight":"heerad","nine":"bradmish","ten":"heemark"
+  "a":"ha","the":"ha","of":"di","and":"wa","for":"lam","on":"al","in":"bi","at":"ba","to":"el","by":"yad","from":"min","with":"im","into":"el-tokh",
+  "was":"hayah","were":"hayu","been":"hayah","being":"haway","had":"kan","has":"yesh","is":"hu","are":"hem","be":"haya",
+  "that":"asher","those":"hemma","these":"elleh","this":"zeh","not":"lo","no":"lo","but":"aval","then":"az","if":"im","so":"ken","because":"ki","as":"ka","do":"asah","did":"asah","done":"asuy","made":"barah",
+  "book":"sefer","world":"olam","earth":"adamah","heaven":"shamay","man":"adam","human":"enosh","humanity":"enoshim",
+  "dragon":"tannin","spirit":"ruah","demon":"shed","angel":"malakh","sword":"kharev","iron":"barzel","fire":"esh","light":"or","dark":"choshek",
+  "food":"lekhem","blood":"dam","flesh":"basar","faith":"emun","salvation":"yesha","creation":"beresh","craig":"craigus","deo":"deo",
+  "wondering":"wonderium","city":"qiryah","people":"am","one":"ehad","two":"shen","three":"shalosh","four":"arba","five":"hamesh","six":"shesh","seven":"sheba",
+  "eight":"shmon","nine":"tesha","ten":"asar"
 };
-
 // Reverse map for direct lexical lookups (Deonics → English)
 const deo2en = Object.create(null);
 for (const [k,v] of Object.entries(en2deo)) {
