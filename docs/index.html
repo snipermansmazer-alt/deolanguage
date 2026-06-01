@@ -86,8 +86,8 @@ for (const [k,v] of Object.entries(en2deo)) {
 // =========================
 // PERSISTENT TRANSLATION MEMORY
 // =========================
-const MEM_EN2DEO = "deonic.mem.en2deo.v2";
-const MEM_DEO2EN = "deonic.mem.deo2en.v2";
+const MEM_EN2DEO = "deonic.mem.en2deo.v999";
+const MEM_DEO2EN = "deonic.mem.deo2en.v999";
 const memEN2DEO = new Map(loadMem(MEM_EN2DEO));
 const memDEO2EN = new Map(loadMem(MEM_DEO2EN));
 function loadMem(key){ try{ const raw = localStorage.getItem(key); return raw? Object.entries(JSON.parse(raw)) : []; }catch{return []} }
