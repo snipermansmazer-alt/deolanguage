@@ -113,77 +113,94 @@ function truncateList(arr, n){ return arr.length<=n? arr : arr.slice(0,n).concat
 //  - variety endings with part-of-speech guess
 //  - memory-backed
 // =========================
+function stablePick(word, list){
+  const code = [...word].reduce((a,c)=>a+c.charCodeAt(0),0);
+  return list[code % list.length];
+}
+
+function getRoot(word){
+  let low = word.toLowerCase();
+
+  low = low
+    .replace(/tion$|sion$/,"")
+    .replace(/ing$/,"")
+    .replace(/ed$/,"")
+    .replace(/ly$/,"")
+    .replace(/ness$/,"")
+    .replace(/ment$/,"")
+    .replace(/ful$/,"")
+    .replace(/less$/,"")
+    .replace(/ous$/,"")
+    .replace(/ive$/,"")
+    .replace(/al$/,"");
+
+  let consonants = low.replace(/[aeiou]/g,"");
+
+  if (consonants.length < 3) {
+    consonants = (consonants + low.replace(/[^aeiou]/g,"")).slice(0,3);
+  }
+
+  consonants = consonants.padEnd(3,"h");
+
+  return consonants.slice(0,3);
+}
+
+function deonicPattern(root, word){
+  const [a,b,c] = root;
+
+  const patterns = [
+    `${a}e${b}os`,
+    `${a}r${b}on`,
+    `${a}ei${b}us`,
+    `${a}${b}tor`,
+    `${a}eu${b}om`,
+    `${a}r${b}es`,
+    `${a}o${b}ar`,
+    `${a}ei${b}or`
+  ];
+
+  return stablePick(word, patterns);
+}
+
 function en2deoUnknown(word){
   const low = word.toLowerCase();
-  if (isSacredWord(low)) return word; // preserve sacred
-  if (/^\d+([.,:/-]\d+)*$/.test(low)) return word; // numbers
+
+  if (isSacredWord(low)) return word;
+  if (/^\d+([.,:/-]\d+)*$/.test(low)) return word;
   if (memEN2DEO.has(low)) return memEN2DEO.get(low);
 
-  // prefix normalize (un-, re-, pre-, trans-, inter-)
-  let stem = low
-    .replace(/^un-/, "in-")
-    .replace(/^re-/, "re-")
-    .replace(/^pre-/, "prae-")
-    .replace(/^trans-/, "trans-")
-    .replace(/^inter-/, "inter-");
+  const root = getRoot(low);
 
-  // plural → singular & common inflections
-  if (/ies$/.test(stem)) stem = stem.replace(/ies$/, "ionae"); // city→ citionae (heuristic)
-  else if (/ves$/.test(stem)) stem = stem.replace(/ves$/, "ae"); // wolves→wolae
-  else if (/(xes|ches|shes|sses|zes)$/.test(stem)) stem = stem.replace(/es$/, "ae");
-  else if (/s$/.test(stem) && !/ss$/.test(stem)) stem = stem.replace(/s$/, "ae");
+  let out = deonicPattern(root, low);
 
-  // verbs/adjs/nouns
-  if (/ied$/.test(stem)) stem = stem.replace(/ied$/, "ium"); // tried→ trium
-  else if (/ed$/.test(stem)) stem = stem.replace(/ed$/, "um");
-  else if (/ing$/.test(stem)) stem = stem.replace(/ing$/, "erion");
+  if (/s$/.test(low) && !/ss$/.test(low)) out += "oi";
+  if (/ed$/.test(low)) out += "ta";
+  if (/ing$/.test(low)) out += "nti";
 
-  if (/ly$/.test(stem)) stem = stem.replace(/ly$/, "lither");
-  if (/ness$/.test(stem)) stem = stem.replace(/ness$/, "tudo");
-  if (/ment$/.test(stem)) stem = stem.replace(/ment$/, "mentum");
-  if (/tion$/.test(stem)) stem = stem.replace(/tion$/, "tio");
-  if (/sion$/.test(stem)) stem = stem.replace(/sion$/, "sio");
-  if (/ship$/.test(stem)) stem = stem.replace(/ship$/, "atus");
-  if (/est$/.test(stem)) stem = stem.replace(/est$/, "issim");
-  if (/er$/.test(stem)) stem = stem.replace(/er$/, "ior");
-  if (/ful$/.test(stem)) stem = stem.replace(/ful$/, "osus"); // helpful→help osus
-  if (/less$/.test(stem)) stem = stem.replace(/less$/, "carens");
-  if (/ive$/.test(stem)) stem = stem.replace(/ive$/, "ivus");
-  if (/ous$/.test(stem)) stem = stem.replace(/ous$/, "osus");
-  if (/al$/.test(stem)) stem = stem.replace(/al$/, "alis");
-
-  // part-of-speech guess for final ending variety
-  const isVerb = /(e|ate|ify|ise|ize|ing|ed|um|erion)$/.test(stem);
-  const isAdj  = /(ful|less|ous|ive|al|ic|ant|ent|ary|alis|ior|eus|ilis|or)$/.test(stem);
-  const isNoun = /(tion|tio|sion|sio|ment|mentum|ness|tudo|dom|hood|ship|ity|itas)$/.test(stem);
-
-  const code = [...low].reduce((a,c)=>a+c.charCodeAt(0),0);
-  const choose = (list)=> list[(code>>>1) % list.length];
-
-  let ending = "on";
-  if (isVerb) ending = choose(["on","um","erion","areon","eron","arion","uron"]);
-  else if (isAdj) ending = choose(["alis","ior","ar","en","eus","ilis","or"]);
-  else if (isNoun) ending = choose(["on","um","is","ae","or","en","ion","amentum","al","ar"]);
-  else ending = choose(["on","um","is","ae","or","en","ion","ar","al"]);
-
-  if (/[aeiou]$/.test(stem) && /^[aeiou]/.test(ending)) ending = ending.slice(1);
-
-  const out = stem + ending;
   memEN2DEO.set(low, out);
   saveMem(MEM_EN2DEO, memEN2DEO);
+
   return out;
 }
 
 function en2deoToken(token, seenDict, seenAuto){
   if (!/[A-Za-z]/.test(token)) return token;
+
   const low = token.toLowerCase();
+
   if (isSacredWord(low)) return matchCasing(low, token);
-  if (en2deo.hasOwnProperty(low)) { seenDict.add(low); return matchCasing(en2deo[low], token); }
+
+  if (Object.prototype.hasOwnProperty.call(en2deo, low)) {
+    seenDict.add(low);
+    return matchCasing(en2deo[low], token);
+  }
+
   const deon = en2deoUnknown(token);
+
   seenAuto.add(low);
+
   return matchCasing(deon, token);
 }
-
 // =========================
 // NEW: DEONICS → ENGLISH (Detranslator)
 //  Heuristics reverse common Deonic endings to plausible English forms.
