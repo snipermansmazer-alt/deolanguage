@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deonics</title>
+<style>
+:root{--paper:#f7f1e5;--ink:#282820;--wine:#663331;--gold:#b99459;--line:#d9ccb4}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.65 Georgia,serif}header{background:#242e29;color:#f6ead2;padding:42px max(20px,calc((100vw - 1100px)/2));border-bottom:4px solid var(--gold)}header small{letter-spacing:.2em;text-transform:uppercase;color:#d6bc87}h1{font-size:58px;line-height:1.1;margin:12px 0}header p{max-width:740px}main{max-width:1140px;margin:auto;padding:20px}nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}button,select,input,textarea{font:inherit}button{background:#e8dcc4;border:1px solid #bdab88;border-radius:5px;padding:8px 15px;cursor:pointer}button.active,button.primary{background:var(--wine);color:white}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #b99459}section[hidden]{display:none}.card{background:#fffcf5;border:1px solid var(--line);padding:24px;margin-bottom:18px;border-radius:8px}h2,h3{color:var(--wine);line-height:1.25}h2{margin-top:0}textarea{width:100%;min-height:160px;resize:vertical;padding:15px;border:1px solid #b5a386;border-radius:5px;background:white}input{padding:9px;width:100%;border:1px solid #b5a386}small,.muted{color:#716953}.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.text{font-size:23px;color:#243c30;white-space:pre-wrap}.source{font-size:14px;color:#746c5b}.error{border-left:4px solid #a0493a;padding-left:15px}.gloss{display:flex;flex-wrap:wrap;gap:12px;margin:15px 0}.morph{display:flex;flex-direction:column;font:14px/1.6 ui-monospace,monospace}.morph span{color:#746c5b;font-size:12px}table{border-collapse:collapse;width:100%;font-size:16px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}.scroll{overflow-x:auto}code{font-size:.9em;background:#ede2cf;padding:2px 4px}blockquote{border-left:3px solid var(--gold);margin-left:0;padding-left:20px}details{margin:15px 0}summary{cursor:pointer;font-weight:bold}footer{text-align:center;padding:24px;color:#746c5b;font-size:13px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}.badge{font:12px system-ui,sans-serif;color:#52634f}li{margin:7px 0}
+@media print{nav,button,textarea,.controls{display:none}section[hidden]{display:block}header{color:black;background:white}body{font-size:11pt}.card{break-inside:avoid}.text{font-size:15pt}}
+</style></head><body>
+<header><small>High liturgical language · Initum-Terra</small><h1>Deonics</h1><p>An offline translator with Deonic grammar, editable word memory, and a high liturgical reference.</p></header>
+<main><nav aria-label="Sections"><button class="active" data-tab="work">Translate</button><button data-tab="memory">Learned words</button><button data-tab="borrow">Build vocabulary</button><button data-tab="grammar">Grammar</button><button data-tab="sound">Sound & origins</button><button data-tab="words">Dictionary</button><button data-tab="readings">Readings</button></nav>
+<section id="work"><div class="card"><h2>Offline translator</h2><p>Translate with Deonic grammar and a growing vocabulary. Unknown content words receive consistent Deonic roots automatically. New roots are saved and inflected using Deonic grammar. Word meanings and complex sentence structure may still be guessed.</p><textarea id="input" aria-label="English text">Hello world!
+The prophet sees the holy city.
+The people will defend Deo with iron swords.
+Luesium asked Kosar: "Who is your king?"</textarea><div class="controls"><button class="primary" id="go">Translate</button><button id="copy">Copy translations</button><button id="download">Download results</button></div><p id="status" role="status"></p><details><summary>What this tool can—and cannot—do</summary><p>This is an offline rule-based translator, not an AI or a universal book translator. Automatic mode coins tentative roots and guesses word classes where possible. Inferred structure is labeled. Vocabulary is created and reused without an approval step. It cannot reliably resolve ambiguity, idioms, or every complex sentence.</p><p>Use “I gave a sword to him,” not “I gave him a sword.” Complete subjects are safest in coordinated clauses; simple shared subjects can be inferred. Simple passives, past perfect, modal verbs, and some infinitive complements are supported. Relative clauses, long auxiliary chains, indirect questions, and idioms can still need human translation.</p><p>List ordinary proper names in the name field to preserve their spelling. Sacred names are built in. Unresolved clauses retain their original English; failed parsing does not save speculative new entries. New assignments in successful translations are saved automatically.</p></details><label for="names">Additional proper names (comma-separated, preserved exactly)</label><input id="names" value="Kosar, Gararta, Hamar, Heutar, Burt" autocomplete="off"></div><div id="results" aria-live="polite"></div></section>
+
+<section id="memory" hidden><div class="card"><h2>Persistent word memory</h2><p>New roots are stable lexical assignments, not discoveries about meaning. The program guesses noun/verb/adjective roles from sentence position and English endings. New assignments are used immediately; edits are optional. Different senses of the same English word still need human judgment.</p><p>Correct a spelling or add a definition, then save the row. Edits update future translations; they do not certify sentence accuracy. Verb roots below exclude the infinitive ending <i>-ar</i>.</p><div class="controls"><button id="memoryExport">Export all vocabulary</button></div><label>Import vocabulary backup<input type="file" id="memoryImport" accept=".json,application/json"></label><p id="memoryStatus" role="status"></p><div class="scroll"><table><thead><tr><th>English / class</th><th>Deonic root</th><th>Definition / sense note</th><th>Status</th></tr></thead><tbody id="memoryRows"></tbody></table></div></div></section>
+<section id="grammar" hidden><div class="card"><h2>One grammar, not a set of decorative endings</h2><p>This edition supersedes contradictory rules in the earlier generated drafts. It is a proposed language standard, not a claim that new rules or historical events already belong to your scripture. Sacred names and the traditional motto remain intact.</p><p>Deonics is predominantly suffixing, with verb–subject–object order, postnominal adjectives, two noun inflection classes, and an obligatory person/number agreement system on finite verbs. It has no grammatical gender in nouns. Personification and ritual importance affect word choice, not arbitrary agreement.</p>
+<blockquote><b>Dar ha navir ha qiryatem qadosi.</b><br>“The prophet sees the holy city.”<br><small>see.3SG · the · prophet · the · city.ACC · holy.SG</small></blockquote>
+<p>A proper name is not synonymous with an office: <i>navir</i> is “prophet”; <i>Wondering</i> and <i>Wonderium</i> are preserved names. Generic “god” is <i>dorar</i>; <i>Deo</i> is the sacred proper name.</p></div>
+<div class="card"><h2>Noun structure</h2><p>Order: article → noun + number + case → adjective → possessor. <i>Ha</i> marks a definite referent. There is no obligatory indefinite article: English “a/an” is normally omitted. Numeral <i>ehad</i> means specifically “one.”</p><div class="scroll"><table><tr><th>Case</th><th>Suffix</th><th>adam “man”</th><th>Function</th></tr><tr><td>Nominative</td><td>—</td><td>adam</td><td>subject or nominal predicate</td></tr><tr><td>Accusative</td><td>-em</td><td>adamem</td><td>direct object</td></tr><tr><td>Genitive</td><td>-ir</td><td>adamir</td><td>possessor</td></tr><tr><td>Dative</td><td>-ul</td><td>adamul</td><td>recipient, destination, beneficiary</td></tr><tr><td>Locative</td><td>-ath</td><td>adamath</td><td>location</td></tr><tr><td>Instrumental</td><td>-en</td><td>adamen</td><td>instrument or accompanying participant</td></tr><tr><td>Ablative</td><td>-esh</td><td>adamesh</td><td>source or separation</td></tr></table></div>
+<p><b>Consonant class:</b> add endings directly: <i>seferem</i> “book.ACC.” <b>Old -at class:</b> citation <i>-ah</i>, inflected stem <i>-at-</i>: <i>qiryah → qiryatem</i>, <i>adamah → adamatath</i>. This alternation is inherited, not optional.</p><p>For vowel-final regular stems, identical vowels merge at suffix boundaries; different vowels stay separate. Number precedes case: <i>adam-im-em → adamimem</i>. Plural <i>-im</i> is productive. Lexical plurals include <i>qiryot</i>, <i>melakhim</i>, <i>enashim</i>, <i>yeladim</i>, and <i>eshot</i>. Mass nouns such as water do not take a plural in the automatic translator.</p><p>The limited dual <i>-ay</i> survives in paired ritual objects and body parts: <i>yaday</i> “two hands.” It takes ordinary case suffixes. It is not required whenever English says “two.” The translator currently uses numeral + plural, not the dual.</p>
+<p><b>Sacred names are indeclinable.</b> Case is expressed outside the name: <i>et Deo</i> (object), <i>di Deo</i> (of Deo), <i>el Deo</i> (to Deo), <i>bi Yekumalesh</i> (in Yekumalesh), <i>im Wondering</i> (with Wondering), <i>min Coelum</i> (from Coelum). These particles preserve the name's spelling. Ordinary listed proper names follow the same respectful convention.</p></div>
+<div class="card"><h2>Possession and modification</h2><p><i>Sefer di Deo</i> is “the book of Deo.” A possessed phrase does not take <i>ha</i>: possession itself identifies it. Compare <i>ha sefer</i> “the book” with <i>sefer tair</i> “your book.” The head still receives its own case: <i>seferem tair</i> “your book” as object.</p><p>Adjectives follow the noun: singular <i>-i</i>, plural <i>-in</i>. They agree in number, not case. <i>Qadosi</i> = holy.SG; <i>qadosin</i> = holy.PL. A material noun follows the head in the genitive: <i>kharevimem barzelir</i> “iron swords” as object. Bare noun stacking is not productive.</p><p>Comparatives in manual composition: <i>mer + adjective + min + comparison phrase</i>. Superlatives: <i>sar + adjective</i>. These constructions are not yet parsed automatically.</p></div>
+<div class="card"><h2>Pronouns</h2><table><tr><th>Person</th><th>Subject</th><th>Object</th><th>Possessor</th><th>Verb ending</th></tr><tr><td>I</td><td>an</td><td>anem</td><td>anir</td><td>-u</td></tr><tr><td>you, singular</td><td>ta</td><td>taem</td><td>tair</td><td>-ta</td></tr><tr><td>he / she / it</td><td>hu / hi / su</td><td>huem / hiem / suem</td><td>huir / hiir / suir</td><td>—</td></tr><tr><td>we</td><td>ni</td><td>niem</td><td>niir</td><td>-nu</td></tr><tr><td>you, plural</td><td>tam</td><td>tamem</td><td>tamir</td><td>-tem</td></tr><tr><td>they</td><td>hen</td><td>henem</td><td>henir</td><td>-ir</td></tr></table><p>The parser reads “you” as singular, “you all” as plural. The collective <i>am</i> “people” takes plural verb agreement despite its singular-looking shape. Noun subjects also control agreement: <i>darir ha navirim</i>, “the prophets see.”</p></div>
+<div class="card"><h2>Verbs, aspect, and prayers</h2><p>Dictionary infinitive: stem + <i>-ar</i>. <i>Davarar</i> “speak” has stem <i>davar</i>; the earlier form <i>davar</i> was mistakenly treated as its infinitive.</p><p>Finite form: tense prefix + aspect prefix + stem + person ending. Present has no tense prefix, past <i>e-</i>, future <i>va-</i>. Perfect/resultative <i>sha-</i>, progressive <i>ra-</i>, habitual <i>na-</i>. Only one aspect prefix per verb. <i>E-daru</i> “I saw”; <i>va-darir</i> “they will see”; <i>sha-daru</i> “I have seen”; <i>ra-darir</i> “they are seeing.” Hyphens mark prefix boundaries in the teaching orthography.</p><p>Two high-frequency verbs have lexical past stems: <i>es → fu</i> “be,” <i>hal → yar</i> “go.” No <i>e-</i> is added to these past stems: <i>fuu</i> “I was,” <i>yarir</i> “they went.” This limited suppletion is specified explicitly, not attributed to an invented sound law.</p><p>Negation <i>lo</i> precedes the finite verb. Imperative = stem; plural imperative = stem + <i>-et</i> (manual composition). Prayer/optative <i>lu</i> precedes the finite verb: <i>Lu gard Deo anem</i>, “May Deo protect me.” Ordinary declaratives must not be automatically turned into prayers.</p><p>Present copula is omitted in affirmative nominal clauses: <i>Deo qadosi</i>, “Deo is holy.” Past/future and negative copulas remain explicit. Predicate nouns never take accusative case. Yes/no questions begin with <i>ma</i>. “Who?” is <i>mi</i>, “what?” is <i>mah</i>; they do not also require <i>ma</i>.</p></div>
+<div class="card"><h2>Beyond simple clauses</h2><p><i>Wa</i> joins clauses; <i>aval</i> contrasts; <i>ki</i> introduces a reason; <i>im</i> introduces a condition. Complete finite clauses keep their own agreement. The comitative particle <i>im</i> and conditional <i>im</i> are distinguished by following noun phrase versus clause.</p><p>For manual writing, relative <i>asher</i> introduces a clause with a resumptive pronoun in the missing role: <i>ha adam asher gard Deo huem</i>, “the man whom Deo protects.” Passive <i>ne-</i> goes directly before the stem; passive subject is the patient, and an agent is marked by <i>yad</i> + genitive phrase. Active participle <i>stem-ant</i> and result participle <i>stem-ut</i> take adjective agreement endings. These manual rules are not automatic-parser features.</p><p>Optional discourse particles <i>ver</i> “I attest” and <i>tor</i> “tradition reports” express the speaker's source. They are not mandatory and do not certify whether a statement is true. Parallelism, repeated divine names, and measured clauses provide a liturgical voice without changing a text's meaning.</p></div><div class="card"><h2>Limits and lexical exceptions</h2><p>Personal pronouns preserve their vowel boundary even when identical: <i>hu-ul → huul</i> “to him,” <i>hi-ir → hiir</i> “her.” Unlike common nouns, they do not undergo vowel coalescence. The parser defaults ambiguous English <i>read</i> to present unless an auxiliary disambiguates it; use “did read” for past. The irregular stem <i>fu</i> is retained before agreement, giving <i>fuu</i> “I was.”</p><p>This reference defines an extensible core. A full language also needs a much larger vocabulary, a substantial edited corpus, and decisions about semantic distinctions and discourse usage. Those are ongoing design work, not features supplied merely by adding grammatical terminology.</p></div></section>
+
+<section id="sound" hidden><div class="card"><h2>A single pronunciation standard</h2><p>Vowels <b>a e i o u</b> are /a e i o u/, not English letter names. Each written vowel is a syllable nucleus; long chanting does not create new lexical vowel lengths. Consonants: /p b t d k g f v s z ʃ x h m n r l j w/. Write /ʃ/ as <i>sh</i>, /x/ as <i>kh</i>, /j/ as <i>y</i>. <i>Q</i> is a conservative spelling of /k/, not a second consonant. <i>Th</i> represents /t/ in inherited endings, <i>beth</i>, and <i>ereth</i>. Proper names preserve their established spelling and may be phonological exceptions.</p><p>Stress the penultimate syllable; monosyllables carry their own stress. Articles and short prepositions lean on the following word. Native syllables allow at most two consonants at an edge, with stop+liquid clusters preferred. Sacred names and the fossilized motto need not satisfy every productive constraint.</p><p>In careful recitation keep vowels and final consonants audible. Adjacent identical vowels at suffix boundaries merge. At word boundaries, nasal /n/ can be pronounced [m] before /p b/ without changing spelling. Chanting lengthens stressed vowels musically; it does not alter the dictionary.</p></div>
+<div class="card"><h2>Naturalism through restricted history</h2><p>The core retains the earlier draft's strongly Semitic-inspired lexicon alongside Latin-flavored ritual loans. These are inspirations in this fictional design, not evidence that Deonics is a historical member of either language family. Its identity comes from stable meaning, grammatical structure, and controlled word families—not a randomly mixed alphabet.</p><p>The proposed old <i>*-at</i> noun ending became <i>-ah</i> word-finally while remaining <i>-at-</i> before suffixes: <i>*qiryat → qiryah</i>, but <i>*qiryat-em → qiryatem</i>. Old <i>*-aw</i> plural endings contracted to <i>-o-</i> before final <i>t</i>, producing the lexical <i>-ot</i> plural. Productive <i>-im</i> later spread to most nouns. These are limited fictional derivations explaining this paradigm; there is no claim of a fully reconstructed ancestral language.</p><p>Learned suffixes create related meanings: <i>gard</i> protect → <i>gardor</i> defender, <i>gardia</i> protection; <i>qados</i> holy → <i>qadosia</i> holiness; <i>malk</i> rule → <i>malkia</i> kingship. Established <i>garor</i> “warrior” remains a lexical item, not an automatic synonym of every defender.</p><p>New words should be coined once, entered with word class and meaning, checked for collisions, and reused. No English consonant-hashing or automatic respelling is permitted.</p></div></section>
+<section id="borrow" hidden><div class="card"><h2>Consistent word building</h2><p>Check the native dictionary first; construct a meaningful compound when appropriate; otherwise adapt a source pronunciation. Adopted entries become regular Deonic nouns in the translator. This pronunciation-based builder supports nouns. Automatic drafts can separately propose nouns, verbs, adjectives, and adverbs in Learned words.</p><div class="grid"><label>English singular meaning<input id="loanMeaning" value="pistol" maxlength="60"></label><label>Source language / route<input id="loanSource" value="English" maxlength="100"></label></div><label>Source pronunciation<input id="loanIPA" value="pɪstəl" maxlength="150"></label><p class="muted">Enter phonemes, not English spelling. For example, supplied /pɪstəl/ becomes <i>pistel</i>. The route label records where the pronunciation came from; it does not guess that pronunciation. IPA subset below.</p><label>Optional native compound: English noun roots, modifier first and head last<input id="loanRoots" placeholder="For example: hand fire" maxlength="100"></label><p class="muted">If roots are supplied, their native stems are compounded instead of borrowing. You decide whether that compound conveys the intended meaning; the tool does not infer definitions.</p><div class="controls"><button id="loanPreview">Propose word</button><button id="loanAdopt">Adopt and save</button><button id="loanExport">Export added vocabulary</button></div><p id="loanStatus" role="status"></p><pre id="loanTrace" style="white-space:pre-wrap"></pre><label>Restore exported vocabulary<input id="loanImport" type="file" accept=".json,application/json"></label><p>Entries are remembered in this browser when storage is available. Export a backup to transfer them to another device or a new copy of this page; the downloaded base HTML does not contain your later additions.</p></div><div class="card"><h2>The actual Deonic borrowing rules</h2><p>Deonics already permits <i>p</i>, final consonants, and clusters of two consonants. Therefore “pistol → bisatola” belongs to the hypothetical example, not this language. Existing native words and sacred names never pass through borrowing rules.</p><ol><li>Read a supplied pronunciation. Ignore stress, length, and syllable-boundary marks; reject unrecognized symbols.</li><li>Map /ɪ/ → i, /ʊ/ → u, /ɛ æ/ → e/a respectively, /ɑ ɐ/ → a, /ɔ ɒ/ → o, /ə ɜ ʌ/ → e. Map /θ/ → t, /ð/ → d, /ʒ/ → sh, /ŋ/ → n, /ɹ ɾ/ → r, /ç/ → kh; /tʃ/ → sh and /dʒ/ → y.</li><li>Retain native sounds, including /p/. Spell /ʃ x j/ as sh, kh, y. Input <i>sh</i> and <i>kh</i> are also accepted as convenient phonemic notation; IPA <i>j</i> means the sound in English “yes.”</li><li>Break runs longer than two consonant phonemes by inserting <i>e</i> before every third consonant. Digraphs sh/kh each count as one sound. Supply <i>e</i> after a wholly consonantal form.</li><li>Do not add a final vowel merely because the word ends in a consonant. Assign ordinary penultimate stress in Deonics.</li><li>Check for collisions, store the result once, and inflect it as a regular noun. A borrowed stem ending in -ah does not acquire the inherited -at alternation.</li></ol><p>Supported native IPA: p b t d k g f v s z ʃ x h m n r l j w a e i o u. Additional mapped symbols are listed above. Other sounds need an explicit design decision rather than a silent guess.</p></div></section>
+<section id="words" hidden><div class="card"><h2>Canonical working dictionary</h2><p id="count"></p><p>Entries are lexical lemmas, not inflated counts of English conjugations. User-adopted additions are identified separately. Sacred spellings remain protected.</p><input id="search" aria-label="Search dictionary" placeholder="Search English or Deonics"><div class="scroll"><table><thead><tr><th>English</th><th>Deonics</th><th>Class / notes</th></tr></thead><tbody id="lex"></tbody></table></div></div></section>
+<section id="readings" hidden><div class="card"><h2>Canon and new composition</h2><blockquote>Lam dorar hu lo dorar gdetor aval Deo.</blockquote><p>The traditional meaning remains “For there is no other god but Deo.” This is preserved as an indivisible inherited formula. The earlier drafts did not establish a defensible word-by-word analysis; this edition does not fabricate one.</p><h3>Opening of a Gararta reading</h3><p>New, simplified composition based on the events you supplied—not a complete translation of the chapter:</p><blockquote>E-gavar Wondering ha erethem.<br>E-zar Wondering ha erethem.<br>E-ven Kosar.<br>E-shal Luesium el Kosar: “Mi melekh tair?”<br>Lu gard Deo ha amem.</blockquote><p>“Wondering conquered the land. Wondering cultivated the land. Kosar came. Luesium asked Kosar: ‘Who is your king?’ May Deo protect the people.”</p><p>The conquest, cultivation, arrival, question, and prayer use the same rules as the workbench. The final prayer is a newly composed addition, not a sentence attributed to your original chapter.</p><h3>Useful expressions</h3><table><tr><th>Deonics</th><th>Meaning</th></tr><tr><td>Shalom taul.</td><td>Hello; peace to you.</td></tr><tr><td>Shalom, o olam!</td><td>Hello, world! (lit. peace, O world)</td></tr><tr><td>Toda taul.</td><td>Thank you.</td></tr><tr><td>Hal bi shalom.</td><td>Farewell; go in peace (fixed formula).</td></tr><tr><td>Lu gard Deo taem.</td><td>May Deo protect you.</td></tr></table></div></section>
+</main><footer>Deonics · coherent-core workbench · no automatic loanword fallback</footer>
+<script>
+'use strict';
+const N={}, A={}, verbs={}, forms={};
+function nouns(spec){spec.split('|').forEach(x=>{const [en,de,pl,cls]=x.split(':');N[en]={en,de,pl:pl||null,cls:cls||'count'};});}
+nouns('god:dorar|prophet:navir|city:qiryah:qiryot|world:olam|earth:adamah::mass|man:adam|woman:isha|person:enosh:enashim|people:am::collective|king:melekh:melakhim|queen:malka|priest:kohen|warrior:garor|child:yeled:yeladim|house:beth|temple:hekal|book:sefer|word:davar|law:toren|faith:emun::mass|salvation:yesha::mass|creation:beresh::mass|spirit:ruah|demon:shed|angel:malakh|dragon:tannin|sword:kharev|iron:barzel::mass|fire:esh:eshot|light:or|darkness:khoshek::mass|blood:dam::mass|flesh:basar::mass|food:lekhem::mass|water:mayim::mass|land:ereth|river:nahar|mountain:har|forest:yaar|tree:ets|horse:sus|sheep:tson:tsonim|wolf:zev|door:dalet|road:derek|day:yom|night:layel|year:shan|beginning:resh|end:ket|love:ahav::mass|hate:sena::mass|peace:shalom::mass|war:milham|truth:emet::mass|name:shem|hand:yad|eye:ayin|head:rosh|arm:zeroa|leg:regel|body:guf|heart:lev|ear:ozen|mouth:peh|voice:qol|life:hayia|death:mot::mass|slave:saibos|servant:avad|master:adon|freedom:harunia::mass|honor:kavod::mass|anger:zaem::mass|shame:kelmia::mass|revenge:neqam::mass|strength:azut::mass|chain:asar|court:dinor|judgment:din|promise:nedar|oath:savua|covenant:berit|mercy:raham::mass|sin:het|sacrifice:qurban|altar:mizah|prayer:tefila|blessing:baraka|curse:arur|soul:neshem|stone:even|dust:afar::mass|soil:adamat::mass|seed:zera|harvest:qatsir|field:sade|farmer:zaror|settler:yashor|mission:shalutia|journey:halia|inheritance:nahala|destiny:manat|will:ratson|thought:hasav|answer:anav|question:shala|meeting:moed|knee:berek|face:pan|sun:shemesh|moon:yerah|star:kokav|sky:shamay::mass|heaven:shamay::mass|bread:pat::mass|wine:tirash::mass|gold:zahav::mass|silver:kesef::mass|wall:garda|defender:gardor|protection:gardia::mass|holiness:qadosia::mass|kingship:malkia::mass');
+'holy:qados|good:tov|bad:ra|great:rav|small:qaton|strong:az|weak:raf|new:hadash|old:atiq|dark:khosh|bright:orik|faithful:emun|true:emet|living:hay|dead:met|free:harun|independent:atsel|nearby:qarov|previous:qadem|recent:hadir|mighty:ravaz|eternal:olamik|silent:damam|wise:hakam|blind:iver|deaf:heresh|angry:zaem|ashamed:kelam|rightful:nahaq|unlawful:untoren|other:akhar|loyal:emun'.split('|').forEach(x=>{let [e,d]=x.split(':');A[e]=d;});
+function verb(en,stem,past,part,ing,third,kind='trans',oldpast=null){verbs[en]={en,stem,kind,oldpast};[[en,'base'],[third,'present'],[past,'past'],[part,'part'],[ing,'ing']].forEach(([w,f])=>{if(!forms[w])forms[w]=[];forms[w].push({v:verbs[en],f});});}
+verb('see','dar','saw','seen','seeing','sees');
+verb('love','ahav','loved','loved','loving','loves');
+verb('hate','sen','hated','hated','hating','hates');
+verb('defend','gard','defended','defended','defending','defends');
+verb('protect','gard','protected','protected','protecting','protects');
+verb('create','bar','created','created','creating','creates');
+verb('speak','davar','spoke','spoken','speaking','speaks','intrans');
+verb('give','nat','gave','given','giving','gives');
+verb('go','hal','went','gone','going','goes','intrans','yar');
+verb('come','ven','came','come','coming','comes','intrans');
+verb('know','yad','knew','known','knowing','knows');
+verb('rule','malk','ruled','ruled','ruling','rules');
+verb('worship','ador','worshipped','worshipped','worshipping','worships');
+verb('ask','shal','asked','asked','asking','asks','ask');
+verb('answer','anav','answered','answered','answering','answers','intrans');
+verb('conquer','gavar','conquered','conquered','conquering','conquers');
+verb('cultivate','zar','cultivated','cultivated','cultivating','cultivates');
+verb('bring','nas','brought','brought','bringing','brings');
+verb('destroy','shamad','destroyed','destroyed','destroying','destroys');
+verb('strike','nak','struck','struck','striking','strikes');
+verb('kill','qat','killed','killed','killing','kills');
+verb('enslave','asar','enslaved','enslaved','enslaving','enslaves');
+verb('free','harun','freed','freed','freeing','frees');
+verb('hear','sham','heard','heard','hearing','hears');
+verb('laugh','sah','laughed','laughed','laughing','laughs','intrans');
+verb('smile','nah','smiled','smiled','smiling','smiles','intrans');
+verb('bow','kar','bowed','bowed','bowing','bows','intrans');
+verb('fall','nafal','fell','fallen','falling','falls','intrans');
+verb('sink','shaq','sank','sunk','sinking','sinks','intrans');
+verb('walk','darak','walked','walked','walking','walks','intrans');
+verb('remember','zakar','remembered','remembered','remembering','remembers');
+verb('forget','nash','forgot','forgotten','forgetting','forgets');
+verb('bless','barak','blessed','blessed','blessing','blesses');
+verb('curse','arar','cursed','cursed','cursing','curses');
+verb('write','katav','wrote','written','writing','writes');
+verb('read','qar','read','read','reading','reads');
+verb('live','hay','lived','lived','living','lives','intrans');
+verb('die','mut','died','died','dying','dies','intrans');
+verb('fear','yare','feared','feared','fearing','fears');
+verb('trust','aman','trusted','trusted','trusting','trusts');
+verb('say','emar','said','said','saying','says','intrans');
+verb('reply','anav','replied','replied','replying','replies','intrans');
+verb('think','hasav','thought','thought','thinking','thinks','flex');
+verb('feel','regash','felt','felt','feeling','feels','flex');
+verb('become','havar','became','become','becoming','becomes','flex');
+verb('begin','resh','began','begun','beginning','begins','flex');
+verb('start','resh','started','started','starting','starts','flex');
+verb('want','ratson','wanted','wanted','wanting','wants','flex');
+verb('try','nasah','tried','tried','trying','tries','flex');
+verb('lose','avad','lost','lost','losing','loses');
+verb('find','matsa','found','found','finding','finds');
+verb('take','laq','took','taken','taking','takes');
+verb('make','asah','made','made','making','makes');
+verb('eat','akal','ate','eaten','eating','eats');
+verb('drink','shat','drank','drunk','drinking','drinks');
+verb('run','ruts','ran','run','running','runs','intrans');
+verb('sleep','yashen','slept','slept','sleeping','sleeps','intrans');
+verb('stand','amad','stood','stood','standing','stands','intrans');
+verb('sit','yashev','sat','sat','sitting','sits','intrans');
+verb('move','nud','moved','moved','moving','moves','flex');
+verb('meet','pagar','met','met','meeting','meets');
+verb('follow','rad','followed','followed','following','follows');
+verb('leave','azav','left','left','leaving','leaves','flex');
+verb('return','shuv','returned','returned','returning','returns','intrans');
+verb('open','patah','opened','opened','opening','opens');
+verb('close','sagar','closed','closed','closing','closes');
+verb('hold','ahaz','held','held','holding','holds');
+verb('teach','lamad','taught','taught','teaching','teaches');
+verb('learn','lamen','learned','learned','learning','learns');
+verb('work','amal','worked','worked','working','works','intrans');
+verb('build','ban','built','built','building','builds');
+verb('fight','laham','fought','fought','fighting','fights','flex');
+verb('help','azar','helped','helped','helping','helps');
+verb('choose','bahar','chose','chosen','choosing','chooses');
+verb('obey','shamar','obeyed','obeyed','obeying','obeys');
+verb('stop','hadel','stopped','stopped','stopping','stops','flex');
+nouns('friend:rea|enemy:tsar|father:av|mother:em|brother:ah|sister:ahot|son:ben|daughter:bat|dog:kelev|cat:shunar|bird:tsipor|fish:dag|animal:hayat|town:qeret|village:kafar|country:medar|room:heder|table:shul|chair:moshav|bed:mishkav|clothing:beged::mass|money:kesia::mass|time:et::mass|moment:rega|morning:boqer|evening:erev|winter:horef|summer:qayits|rain:matar::mass|wind:ruhen::mass|snow:sheleg::mass|sea:yam|island:iyah|battle:qerav|army:tsava|shield:magen|spear:romah|arrow:hets|weapon:keli|teaching:lamadia|rule:mishar|cultivation:zaria::mass|convert:shuvor|tour:halut|embarrassment:kelmia::mass|slavery:asarut::mass');
+Object.assign(A,{happy:'samel',sad:'atsuv',beautiful:'yafe',ugly:'kaer',long:'aruk',short:'qatsar',large:'gadol',little:'qaton',young:'naer',red:'adom',white:'lavan',black:'shahor',blue:'tekhel',green:'yaroq',many:'rav',all:'kol',own:'atsmi',ready:'nakhon',wrong:'taeh',right:'yashar'});
+const ADV={now:'ata',then:'az',always:'tamid',never:'loet',again:'shuv',quickly:'maher',slowly:'leat',quietly:'damamen',today:'hayom',yesterday:'etmol',tomorrow:'mahar',here:'po',there:'sham',nearby:'qaroven',forever:'olamen',very:'meod',really:'amen',too:'gam',also:'gam',only:'raq',already:'kavar',still:'oden'};
+const MODAL={can:'yak',could:'e-yak',must:'havar',should:'raui',would:'lu',shall:'va',might:'ulai'};
+const P={i:['an','1SG'],me:['an','1SG'],you:['ta','2SG'],he:['hu','3SG'],him:['hu','3SG'],she:['hi','3SG'],her:['hi','3SG'],it:['su','3SG'],we:['ni','1PL'],us:['ni','1PL'],they:['hen','3PL'],them:['hen','3PL'],youall:['tam','2PL']};
+const possess={my:'i',your:'you',his:'he',her:'she',its:'it',our:'we',their:'they'};
+const independentPossess={mine:'i',yours:'you',his:'he',hers:'she',ours:'we',theirs:'they',its:'it'};
+const suffix={nom:'',acc:'em',gen:'ir',dat:'ul',loc:'ath',ins:'en',abl:'esh'};
+const part={acc:'et',gen:'di',dat:'el',loc:'bi',ins:'im',abl:'min'};
+const endings={'1SG':'u','2SG':'ta','3SG':'','1PL':'nu','2PL':'tem','3PL':'ir'};
+const numbers={one:['ehad',1],two:['shen',2],three:['shalosh',3],four:['arba',4],five:['hamesh',5],six:['shesh',6],seven:['sheba',7],eight:['shmon',8],nine:['tesha',9],ten:['asar',10]};
+const namesBase='Deo,Craig,Craigus,Luesium,Initum,Initum-Terra,Obscurus-Silva,Yekumalesh,Wonderium,Wondering,Coelum,Mori,Nehnna';
+const englishPlurals={men:'man',women:'woman',children:'child',people:'people',feet:'foot',wolves:'wolf'};
+const prep={to:'dat',for:'dat',in:'loc',at:'loc',on:'loc',with:'ins',from:'abl'};
+function tok(s){return s.toLowerCase().trim().split(/\s+/).filter(Boolean);}
+function fail(s){throw Error(s);}
+// Nominal vowel coalescence does not apply to personal pronouns: hu + ul = huul.
+function joinStem(a,b){return b&&a.endsWith(b[0])&&/[aeiou]/.test(b[0])?a+b.slice(1):a+b;}
+function m(t,g){return {t,g};}
+function lexN(w){if(N[w])return {n:N[w],pl:false};let base=englishPlurals[w]||(w.endsWith('ies')?w.slice(0,-3)+'y':w.endsWith('s')?w.slice(0,-1):'');return N[base]?{n:N[base],pl:true}:null;}
+const learned=new Map(),MEMORY_KEY='deonics.learned.v1';
+const reservedWords=new Set(('the a an of and or but because if then is are am was were be been being has have had do does did will may not no to for in at on with from by who what which that this these those hello hi greetings goodbye thanks youall '+Object.keys(P).join(' ')+' '+Object.keys(possess).join(' ')+' '+Object.keys(MODAL).join(' ')).split(' '));
+function lemma(w,pos){if(pos==='noun')return w.endsWith('ies')?w.slice(0,-3)+'y':w.endsWith('s')&&!w.endsWith('ss')?w.slice(0,-1):w;if(pos==='verb'){if(w.endsWith('ied'))return w.slice(0,-3)+'y';let stem=w.replace(/ing$|ed$|s$/,'');if(/([bdgmnprt])\1$/.test(stem))stem=stem.slice(0,-1);if(/at$|iz$/.test(stem))stem+='e';return stem;}return w;}
+function usedRoots(){return new Set([...Object.values(N).map(x=>x.de),...Object.values(A),...Object.values(ADV),...Object.values(verbs).map(x=>x.stem),...namesBase.toLowerCase().split(',')]);}
+function generatedRoot(key){
+ const c=['b','d','f','g','k','l','m','n','r','s','t','v','z','sh','kh'],v=['a','e','i','o','u'],used=usedRoots();
+ for(let salt=0;salt<10000;salt++){let h=2166136261;for(const ch of key+':'+salt)h=Math.imul(h^ch.charCodeAt(0),16777619)>>>0;let s='';for(const pool of [c,v,c,v,c,v,c]){s+=pool[h%pool.length];h=Math.floor(h/pool.length);}if(!used.has(s))return s;}fail('Root allocation failed.');
+}
+function installLearned(r){
+ if(r.pos==='noun')N[r.en]={en:r.en,de:r.de,pl:null,cls:'count',added:true,learned:true};
+ if(r.pos==='adjective')A[r.en]=r.de;
+ if(r.pos==='adverb')ADV[r.en]=r.de;
+ if(r.pos==='verb'){
+  const e=r.en,past=e.endsWith('e')?e+'d':e.endsWith('y')?e.slice(0,-1)+'ied':e+'ed',ing=e.endsWith('e')?e.slice(0,-1)+'ing':e+'ing',third=e.endsWith('y')?e.slice(0,-1)+'ies':e+'s';
+  for(const k of Object.keys(forms)){forms[k]=forms[k].filter(x=>x.v.en!==e);if(!forms[k].length)delete forms[k];}
+  verb(e,r.de,past,past,ing,third,'flex');
+  for(const a of r.aliases||[]){if(!forms[a.word])forms[a.word]=[];if(!forms[a.word].some(x=>x.v.en===e&&x.f===a.f))forms[a.word].push({v:verbs[e],f:a.f});}
+ }
+}
+function learnWord(word,pos,ctx){
+ if(!ctx.auto||ctx.probe)fail('Unknown '+pos+': '+word);
+ if(!/^[a-z]{2,60}$/.test(word)||reservedWords.has(word)||ctx.names.has(word))fail('Cannot infer a lexical role for “'+word+'”.');
+ const en=lemma(word,pos),key=pos+':'+en;let r=learned.get(key);
+ if(!r){r={en,pos,de:generatedRoot(key),approved:true,note:'',aliases:[]};learned.set(key,r);}
+ if(pos==='verb'){let f=word.endsWith('ing')?'ing':word.endsWith('ed')?'past':word===en?'base':'present';if(!r.aliases.some(a=>a.word===word&&a.f===f))r.aliases.push({word,f});if(f==='past'&&!r.aliases.some(a=>a.word===word&&a.f==='part'))r.aliases.push({word,f:'part'});}
+ installLearned(r);ctx.notes?.add('Created '+pos+': '+en+' → '+r.de+'; role inferred automatically.');return r;
+}
+function checkLearned(en,pos,ctx){const r=learned.get(pos+':'+en);if(r)r.approved=true;}
+function np(ws,c='nom',ctx){
+ if(!ws.length)fail('A noun phrase is missing.');
+ if(ws.length===1&&independentPossess[ws[0]]){const owner=P[independentPossess[ws[0]]],ms=[m(owner[0]+'ir',owner[1]+'.POSS')];return {ms:[...(['nom','gen'].includes(c)?[]:[m(part[c],c.toUpperCase())]),...ms],person:'3SG',pl:false};}
+ const ai=ws.indexOf('and');if(ai>0){let a=np(ws.slice(0,ai),c,ctx),b=np(ws.slice(ai+1),c,ctx);return {ms:[...a.ms,m('wa','and'),...b.ms],person:'3PL',pl:true};}
+ let own=null,oi=ws.indexOf('of');if(oi>0){own=np(ws.slice(oi+1),'gen',ctx);ws=ws.slice(0,oi);}
+ if(possess[ws[0]]&&ws.length>1){if(own)fail('Use one explicit possessor per phrase.');own=np([possess[ws[0]]],'gen',ctx);ws=ws.slice(1);}
+ let pi=ws.findIndex(w=>w.endsWith("'s"));if(pi>=0){if(own)fail('Nested possession needs an explicit “of” phrase.');own=np([...ws.slice(0,pi),ws[pi].slice(0,-2)],'gen',ctx);ws=ws.slice(pi+1);}
+ if(ws.length===2&&ws.join(' ')==='you all')ws=['youall'];
+ if(ws.length===1&&P[ws[0]]){let [stem,person]=P[ws[0]];return {ms:[m(stem+suffix[c],person+(c==='nom'?'':'.'+c.toUpperCase()))],person,pl:person.endsWith('PL')};}
+ const key=ws.join(' ');if(ctx.names.has(key)){let name=ctx.names.get(key);return {ms:[...(c==='nom'?[]:[m(part[c],c.toUpperCase())]),m(name,name)],person:'3SG',pl:false};}
+ let demo=null;if(['this','that','these','those'].includes(ws[0])){demo=ws[0];ws=ws.slice(1);}
+ let definite=!!demo||ws[0]==='the';if(['the','a','an'].includes(ws[0]))ws=ws.slice(1);
+ let num=null;if(numbers[ws[0]]){num=numbers[ws[0]];ws=ws.slice(1);}
+ let head=lexN(ws.at(-1)||'');if(!head&&ctx.auto&&!ctx.probe){learnWord(ws.at(-1)||'','noun',ctx);head=lexN(ws.at(-1));}if(!head)fail('Unknown noun or unlisted name: '+(ws.at(-1)||'(empty)')+'. Add proper names in the name field; ordinary words need dictionary entries.');
+ checkLearned(head.n.en,'noun',ctx);
+ let {n,pl}=head;pl=pl||(num&&num[1]>1)||false;if(pl&&n.cls==='mass')fail('“'+n.en+'” is a mass noun; use a measure phrase in a human translation.');
+ let modifiers=ws.slice(0,-1),adjs=[],material=[];for(const w of modifiers){if(A[w]){checkLearned(w,'adjective',ctx);adjs.push(w);}else if(N[w]&&['iron','gold','silver','stone'].includes(w))material.push(w);else if(ctx.auto&&!ctx.probe){learnWord(w,'adjective',ctx);adjs.push(w);}else fail('Unsupported modifier “'+w+'”. Use dictionary adjectives before one noun.');}
+ let stem=pl?(n.pl||joinStem(n.de,'im')):c!=='nom'&&!n.added&&n.de.endsWith('ah')?n.de.slice(0,-2)+'at':n.de;
+ let ms=[];if(definite&&!own)ms.push(m('ha','DEF'));if(num)ms.push(m(num[0],String(num[1])));
+ ms.push(m(joinStem(stem,suffix[c]),n.en+(pl?'.PL':'')+(c==='nom'?'':'.'+c.toUpperCase())));
+ adjs.forEach(w=>ms.push(m(joinStem(A[w],pl?'in':'i'),w+(pl?'.PL':'.SG'))));
+ if(demo)ms.push(m(({this:'ze',that:'za',these:'zein',those:'zain'})[demo],demo));material.forEach(w=>ms.push(...np([w],'gen',ctx).ms));if(own)ms.push(...own.ms);
+ return {ms,person:pl||n.cls==='collective'?'3PL':'3SG',pl};
+}
+function adjPred(ws,subject){if(!ws.length||!ws.every(w=>A[w]))return null;return ws.map(w=>m(joinStem(A[w],subject.pl?'in':'i'),w+(subject.pl?'.PL':'.SG')));}
+function vf(v,person,tense,aspect){let stem=v.stem,pre=tense==='past'?'e-':tense==='future'?'va-':'';if(tense==='past'&&!aspect&&v.oldpast){stem=v.oldpast;pre='';}let asp={perfect:'sha-',progressive:'ra-',habitual:'na-'}[aspect]||'';return m(pre+asp+stem+endings[person],v.en+'.'+tense.toUpperCase()+(aspect?'.'+aspect.toUpperCase():'')+'.'+person);}
+function normalize(s){return s.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[‘’]/g,"'").replace(/don’t|don't/gi,'do not').replace(/doesn't/gi,'does not').replace(/didn't/gi,'did not').replace(/isn't/gi,'is not').replace(/aren't/gi,'are not').replace(/wasn't/gi,'was not').replace(/won't/gi,'will not').replace(/can't/gi,'can not').replace(/\s+/g,' ').trim();}
+function parse(text,ctx,depth=0){
+ if(depth>8)fail('Clause nesting exceeds this parser’s limit.');
+ let s=normalize(text).replace(/\bI'm\b/gi,'I am').replace(/\b(you|we|they)'re\b/gi,'$1 are').replace(/\b(I|you|we|they)'ve\b/gi,'$1 have').replace(/\b(I|you|he|she|we|they)'ll\b/gi,'$1 will').replace(/[.!?]+$/,'').trim();if(!s)fail('Empty clause.');
+ // Quotation has its own recursively parsed clause, never suffixes attached to quote text.
+ let quote=s.match(/^(.*?)[:,]?\s+["“](.+)["”]$/);if(quote){let a=parse(quote[1].replace(/[:,]$/,''),ctx,depth+1),b=parse(quote[2],ctx,depth+1);b[0]={...b[0],t:b[0].t[0].toUpperCase()+b[0].t.slice(1)};return [...a,m(':',':'),m('“','QUOTE'),...b,m(/[?!]$/.test(quote[2])?quote[2].slice(-1):'.','PUNCT'),m('”','QUOTE')];}
+ if(s.includes(';'))return s.split(';').flatMap((x,i)=>[...(i?[m(';','PUNCT')]:[]),...parse(x,ctx,depth+1)]);
+ let ws=tok(s.replace(/^(hello|hi|greetings),\s*/i,'$1 '));
+ if(['hello','hi','greetings'].includes(ws[0])){let rest=ws.slice(1).join(' ').replace(/^,\s*/,'');if(!rest)return [m('Shalom','peace'),m('taul','2SG.DAT')];let n=np(tok(rest.replace(/,/g,'')),'nom',ctx);return [m('Shalom','peace'),m('o','VOC'),...n.ms];}
+ if(['thank you','thanks'].includes(ws.join(' ')))return [m('Toda','thanks'),m('taul','2SG.DAT')];
+ if(ws.join(' ')==='goodbye')return [m('Hal','go.IMP'),m('bi','in.FORMULA'),m('shalom','peace')];
+ if(ws.join(' ')==='for there is no other god but deo')return [m('Lam dorar hu lo dorar gdetor aval Deo','CANONICAL FORMULA; traditional meaning preserved')];
+ if(s.includes(',')){if(ws[0]==='if'){let cut=s.indexOf(',');return [m('im','if'),...parse(s.slice(3,cut),ctx,depth+1),m('az','then'),...parse(s.slice(cut+1),ctx,depth+1)];}s=s.replace(/,\s*(and|but|because)\b/g,' $1');ws=tok(s);}
+ if(/[,;"“”]/.test(s))fail('This punctuation or embedded clause needs review. Try complete sentences separated by periods.');
+ const predicateAt=w=>forms[w]||['is','am','are','was','were','will','do','does','did','has','have','had'].includes(w)||MODAL[w];
+ for(const [eng,de] of [['because','ki'],['but','aval'],['and','wa']]){
+  let i=ws.indexOf(eng);
+  if(i>0&&ws.slice(0,i).some(predicateAt)&&ws.slice(i+1).some(predicateAt)){let left=parse(ws.slice(0,i).join(' '),ctx,depth+1),right=ws.slice(i+1);if(forms[right[0]]&&ctx.lastSubject){right=[...ctx.lastSubject,...right];ctx.notes?.add('Shared subject inferred in coordinated clause.');}return [...left,m(de,eng),...parse(right.join(' '),ctx,depth+1)];}
+ }
+ if(ws[0]==='if'){let then=ws.indexOf('then');if(then<0)fail('For a condition use “If … then …”.');return [m('im','if'),...parse(ws.slice(1,then).join(' '),ctx,depth+1),m('az','then'),...parse(ws.slice(then+1).join(' '),ctx,depth+1)];}
+ if(['who','what'].includes(ws[0])&&['is','are'].includes(ws[1])){let rhs=np(ws.slice(2),'nom',ctx);return [m(ws[0]==='who'?'mi':'mah',ws[0]),...rhs.ms];}
+ const ci=ws.indexOf('that');if(ci>0&&ws.slice(0,ci).some(predicateAt)&&ws.slice(ci+1).some(predicateAt)){const left=ws.slice(0,ci),right=ws.slice(ci+1);return [...parse(left.join(' '),ctx,depth+1),m('ki','COMPLEMENT'),...parse(right.join(' '),ctx,depth+1)];}
+ let adv=[];if(ws.length>1){ws=ws.filter((w,i)=>{if(ADV[w]&&!A[w]){adv.push(m(ADV[w],w+'.ADV'));checkLearned(w,'adverb',ctx);return false;}if(ctx.auto&&/ly$/.test(w)&&!A[w]&&!N[w]&&i>0){learnWord(w,'adverb',ctx);adv.push(m(ADV[w],w+'.ADV'));return false;}return true;});}
+ let question=/\?$/.test(text),opt=false,front=null;
+ if(ws[0]==='may'){opt=true;ws.shift();}
+ if(['do','does','did','will','is','are','was','were'].includes(ws[0])||MODAL[ws[0]]){front=ws.shift();question=true;}
+ let vi=ws.findIndex((w,i)=>{if(!predicateAt(w))return false;if(i===0)return !!forms[w];try{np(ws.slice(0,i),'nom',{...ctx,probe:true});return true;}catch(e){return false;}});
+ if(vi<0&&ctx.auto){let known=ws.findIndex((w,i)=>i>0&&predicateAt(w));if(known>0){vi=known;ctx.notes?.add('Subject phrase interpreted heuristically.');}else{let guess=-1;if(ws.length>1&&(P[ws[0]]||ctx.names.has(ws[0])))guess=1;else if(ws.length>2&&['the','a','an'].includes(ws[0])){guess=ws.findIndex((w,i)=>i>1&&(/ed$|ing$/.test(w)||/s$/.test(w)&&!/ous$|ness$/.test(w))&&!A[w]&&!N[w]);if(guess<0)guess=2;}if(guess>0&&!reservedWords.has(ws[guess])&&!Object.hasOwn(N,ws[guess])&&!Object.hasOwn(A,ws[guess])){learnWord(ws[guess],'verb',ctx);vi=guess;ctx.notes?.add('Verb position and English inflection guessed.');}}}
+ if(vi<0){if(front&&['is','are','was','were'].includes(front)){
+    for(let k=ws.length-1;k>0;k--){try{let sub=np(ws.slice(0,k),'nom',ctx),pred=adjPred(ws.slice(k),sub)||np(ws.slice(k),'nom',ctx).ms;let ms=front==='was'||front==='were'?[vf({en:'be',stem:'es',oldpast:'fu'},sub.person,'past',null),...sub.ms,...pred]:[...sub.ms,...pred];return [m('ma','Q'),...ms];}catch(e){}}
+   }
+   return np(ws,'nom',ctx).ms;
+ }
+ let subjWords=ws.slice(0,vi),imperative=vi===0&&!opt&&!front;let subject=imperative?{ms:[],person:'2SG',pl:false}:np(subjWords,'nom',ctx);if(subjWords.length)ctx.lastSubject=subjWords;
+ let rest=ws.slice(vi),tense='present',aspect=null,neg=false,aux=null,modal=null;
+ if(front&&MODAL[front]){modal=front;front=null;}if(MODAL[rest[0]])modal=rest.shift();
+ if(front){aux=front;if(front==='did'||front==='was'||front==='were')tense='past';if(front==='will')tense='future';}
+ if(['will','do','does','did','has','have','had','is','am','are','was','were'].includes(rest[0])){if(aux)fail('Multiple auxiliary groups need human translation.');aux=rest.shift();if(['did','was','were','had'].includes(aux))tense='past';if(aux==='will')tense='future';}
+ if(rest[0]==='not'){neg=true;rest.shift();}
+ const frame=[...(question?[m('ma','Q')]:[]),...(opt?[m('lu','OPT')]:[]),...(modal?[m(MODAL[modal],modal+'.MODAL')]:[]),...(neg?[m('lo','NEG')]:[])];
+ if(['has','have','had'].includes(aux)&&!(forms[rest[0]]||[]).some(x=>x.f==='part')&&!/ed$/.test(rest[0]||'')){return [...frame,vf({en:'have',stem:'yesh'},subject.person,tense,null),...subject.ms,...np(rest,'acc',ctx).ms,...adv];}
+ if(rest[0]==='be'&&['will',null].includes(aux)){rest.shift();aux='is';}
+ if(ctx.auto&&['is','am','are','was','were'].includes(aux)&&!forms[rest[0]]&&/ing$/.test(rest[0]||''))learnWord(rest[0],'verb',ctx);
+ const passive=aux&&['is','am','are','was','were'].includes(aux)&&(forms[rest[0]]||[]).some(x=>x.f==='part')&&!(forms[rest[0]]||[]).some(x=>x.f==='ing');
+ if(passive){let v=forms[rest.shift()].find(x=>x.f==='part').v,tail=[];if(rest[0]==='by'){tail=[m('yad','AGENT'),...np(rest.slice(1),'gen',ctx).ms];}else if(rest.length)fail('Passive complement needs review.');return [...frame,vf({...v,stem:'ne-'+v.stem,oldpast:null},subject.person,tense,null),...subject.ms,...tail,...adv];}
+ let cop=aux&&['is','am','are','was','were'].includes(aux)&&!(forms[rest[0]]||[]).some(x=>x.f==='ing');
+ if(cop){if(ctx.auto&&rest.length===1&&!A[rest[0]]&&!N[rest[0]]&&!independentPossess[rest[0]]&&!P[rest[0]]&&!ctx.names.has(rest[0]))learnWord(rest[0],'adjective',ctx);let pred=adjPred(rest,subject);if(pred)rest.forEach(w=>checkLearned(w,'adjective',ctx));if(!pred){if(prep[rest[0]])pred=np(rest.slice(1),prep[rest[0]],ctx).ms;else pred=np(rest,'nom',ctx).ms;}
+  let ms=tense==='present'&&!neg?[...subject.ms,...pred]:[vf({en:'be',stem:'es',oldpast:'fu'},subject.person,tense,null),...subject.ms,...pred];return [...frame,...ms,...adv];}
+ let options=forms[rest[0]];if(!options&&ctx.auto){learnWord(rest[0]||'','verb',ctx);options=forms[rest[0]];}if(!options)fail('Unknown verb: '+(rest[0]||'(missing)'));
+ let chosen;if(['have','has','had'].includes(aux)){chosen=options.find(x=>x.f==='part');aspect='perfect';}
+ else if(['is','am','are','was','were'].includes(aux)){chosen=options.find(x=>x.f==='ing');aspect='progressive';}
+ else if(aux||imperative||opt)chosen=options.find(x=>x.f==='base');
+ else chosen=options.find(x=>['base','present','past'].includes(x.f));
+ if(!chosen)fail('That auxiliary does not match the verb form, or the construction is unsupported.');
+ if(!aux&&chosen.f==='past')tense='past';let v=chosen.v;checkLearned(v.en,'verb',ctx);rest.shift();
+ if(rest[0]==='to'&&(forms[rest[1]]||[]).some(x=>x.f==='base')&&['begin','start','want','try'].includes(v.en)){const comp=rest.slice(1),inner=parse(comp.join(' '),ctx,depth+1);inner[0]=m(forms[comp[0]].find(x=>x.f==='base').v.stem+'ar',comp[0]+'.INF');return [...frame,vf(v,subject.person,tense,aspect),...subject.ms,...inner,...adv];}
+ let chunks=[],object=[];while(rest.length&&!prep[rest[0]])object.push(rest.shift());
+ if(object.length){if(v.kind==='intrans')fail('“'+v.en+'” takes no direct object here. Use a preposition or a separate clause.');chunks.push(...np(object,v.kind==='ask'?'dat':'acc',ctx).ms);}
+ else if(v.kind==='trans')fail('“'+v.en+'” requires a direct object.');
+ while(rest.length){let pr=rest.shift(),phrase=[];while(rest.length&&!prep[rest[0]])phrase.push(rest.shift());chunks.push(...np(phrase,prep[pr],ctx).ms);}
+ let vm=imperative?m(v.stem,v.en+'.IMP'):vf(v,subject.person,tense,aspect);
+ return [...frame,vm,...subject.ms,...chunks,...adv];
+}
+function splitText(s){let result=[],start=0,quote=false;for(let i=0;i<s.length;i++){if(/["“”]/.test(s[i]))quote=!quote;if(!quote&&/[.!?\n]/.test(s[i])){let seg=s.slice(start,i+1).trim();if(seg&&!/^[.!?]+$/.test(seg))result.push(seg);start=i+1;}}if(s.slice(start).trim())result.push(s.slice(start).trim());return result;}
+function context(extra='',auto=false){return {auto,notes:new Set(),names:new Map((namesBase+','+extra).split(',').map(s=>s.trim()).filter(Boolean).map(s=>[s.toLowerCase(),s]))};}
+function dropLearned(key){let r=learned.get(key);if(!r)return;if(r.pos==='noun')delete N[r.en];if(r.pos==='adjective')delete A[r.en];if(r.pos==='adverb')delete ADV[r.en];if(r.pos==='verb'){delete verbs[r.en];for(const w of Object.keys(forms)){forms[w]=forms[w].filter(x=>x.v.en!==r.en);if(!forms[w].length)delete forms[w];}}learned.delete(key);}
+// A failed syntactic analysis must never prevent an automatic rendering.
+const fallbackGrammar={the:'ha',a:'',an:'',of:'di',and:'wa',or:'au',but:'aval',because:'ki',if:'im',then:'az',is:'es',are:'es',am:'es',was:'fu',were:'fu',be:'es',been:'sha-es',being:'ra-es',has:'yesh',have:'yesh',had:'e-yesh',do:'as',does:'as',did:'e-as',will:'va',may:'lu',not:'lo',no:'lo',by:'yad',who:'mi',what:'mah',which:'asher',that:'za',this:'ze',these:'zein',those:'zain',hello:'shalom',hi:'shalom',greetings:'shalom',goodbye:'lekh shalom',thanks:'todah'};
+for(const table of [N,A,verbs,forms,P,possess,independentPossess,prep,numbers,ADV,MODAL,englishPlurals,fallbackGrammar])Object.setPrototypeOf(table,null);
+function fallbackToken(raw,ctx,c='nom'){
+ const w=raw.toLowerCase();
+ if(ctx.names.has(w))return [...(c==='nom'?[]:[m(part[c],c.toUpperCase())]),m(ctx.names.get(w),'NAME')];
+ if(independentPossess[w]||possess[w])return [m(P[independentPossess[w]||possess[w]][0]+'ir','POSS')];
+ if(P[w])return [m(P[w][0]+suffix[c],P[w][1]+'.'+c.toUpperCase())];
+ if(prep[w])return [m(part[prep[w]],prep[w].toUpperCase())];
+ if(Object.hasOwn(fallbackGrammar,w))return fallbackGrammar[w]?[m(fallbackGrammar[w],w)]:[];
+ if(MODAL[w])return [m(MODAL[w],w)];
+ if(ADV[w])return [m(ADV[w],w)];
+ if(numbers[w])return [m(numbers[w][0],w)];
+ if(A[w])return [m(joinStem(A[w],'i'),w+'.SG')];
+ let n=lexN(w);
+ if(n){let stem=n.pl?(n.n.pl||joinStem(n.n.de,'im')):c!=='nom'&&!n.n.added&&n.n.de.endsWith('ah')?n.n.de.slice(0,-2)+'at':n.n.de;return [m(joinStem(stem,suffix[c]),n.n.en+(n.pl?'.PL':'')+'.'+c.toUpperCase())];}
+ if(forms[w])return [vf(forms[w][0].v,'3SG',forms[w][0].f==='past'?'past':'present',null)];
+ if(/^[a-z]{2,60}$/.test(w)&&!reservedWords.has(w)){
+  const pos=w.endsWith('ly')?'adverb':'noun',r=learnWord(w,pos,{...ctx,auto:true});
+  return pos==='noun'?fallbackToken(w,ctx,c):[m(r.de,w+'.ADV')];
+ }
+ if(/[\p{L}]/u.test(w)){
+  // Unusual spellings have a pure deterministic mapping, including after reload.
+  let hash=2166136261;for(const ch of w)hash=Math.imul(hash^ch.codePointAt(0),16777619)>>>0;
+  let root='';for(let i=0;i<4;i++){root+='bdgklmnrstvz'[hash%11];hash=Math.floor(hash/11);root+='aeiou'[hash%5];hash=Math.floor(hash/5);}
+  ctx.notes.add('Unusual spelling “'+raw+'” received a deterministic coined root.');
+  return [m(joinStem(root,suffix[c]),w+'.COINED')];
+ }
+ return [m(raw,'SYMBOL')];
+}
+function fallbackPhrase(ws,c,ctx){
+ if(!ws.length)return [];
+ try{return np(ws,c,{...ctx,probe:true}).ms;}catch(e){}
+ let out=[],pending=c;
+ for(let i=0;i<ws.length;i++){
+  const w=ws[i];
+  if(possess[w]&&i+1<ws.length){
+   let j=i+1;while(j<ws.length&&!prep[ws[j]]&&!P[ws[j]])j++;
+   out.push(...fallbackPhrase(ws.slice(i+1,j),pending,ctx),m(P[possess[w]][0]+'ir','POSS'));i=j-1;pending='nom';continue;
+  }
+  if(prep[w]){pending=prep[w];continue;}
+  out.push(...fallbackToken(w,ctx,pending));
+  if(w!=='the'&&w!=='a'&&w!=='an'&&!A[w])pending='nom';
+ }
+ if(prep[ws.at(-1)])out.push(m(part[prep[ws.at(-1)]],prep[ws.at(-1)].toUpperCase()));
+ return out;
+}
+function fallbackClause(ws,ctx){
+ if(!ws.length)return [];
+ let vi=ws.findIndex(w=>forms[w]&&!P[w]&&!possess[w]&&!prep[w]);
+ if(vi<0&&P[ws[0]]&&ws.length>1){
+  let i=1;while(i<ws.length&&(ADV[ws[i]]||ws[i]==='not'))i++;
+  if(i<ws.length&&/^[a-z]{2,60}$/.test(ws[i])&&!reservedWords.has(ws[i])&&!N[ws[i]]&&!A[ws[i]]){
+   learnWord(ws[i],'verb',{...ctx,auto:true});vi=i;
+  }
+ }
+ if(vi>=0){
+  let subject=ws.slice(0,vi),entry=forms[ws[vi]][0],person=P[subject[0]]?.[1]||'3SG';
+  try{person=np(subject,'nom',{...ctx,probe:true}).person;}catch(e){}
+  return [vf(entry.v,person,entry.f==='past'?'past':'present',entry.f==='ing'?'progressive':null),
+   ...fallbackPhrase(subject,'nom',ctx),...fallbackPhrase(ws.slice(vi+1),'acc',ctx)];
+ }
+ return fallbackPhrase(ws,'nom',ctx);
+}
+function automaticFallback(source,ctx){
+ ctx.notes.add('Approximate grammar: sentence structure was inferred with the fallback rules. Coined words are vocabulary assignments, not inferred definitions.');
+ const tokens=normalize(source).match(/[\p{L}\p{M}]+(?:'[\p{L}\p{M}]+)*|\p{N}+|[^\s]/gu)||[];
+ let out=[],clause=[];
+ for(const raw of tokens){
+  const w=raw.toLowerCase();
+  if(['and','but','because','or'].includes(w)||!/[\p{L}\p{N}]/u.test(w)){
+   out.push(...fallbackClause(clause,ctx),...fallbackToken(raw,ctx));clause=[];
+  }else clause.push(w);
+ }
+ out.push(...fallbackClause(clause,ctx));return out;
+}
+function run(text,extra='',auto=true){
+ const segments=splitText(String(text));if(!segments.length&&String(text).trim())segments.push(String(text).trim());
+ return segments.map(source=>{
+  let ctx=context(extra,auto),before=new Set(learned.keys()),ms,approximate=false;
+  try{ms=parse(source,ctx);if(!ms.length)throw new Error('Empty parse');}
+  catch(e){
+   for(const key of [...learned.keys()])if(!before.has(key))dropLearned(key);
+   ctx=context(extra,true);approximate=true;
+   try{ms=automaticFallback(source,ctx);}
+   catch(e){ms=(normalize(source).match(/[\p{L}\p{M}]+|\p{N}+|[^\s]/gu)||[]).flatMap(w=>fallbackToken(w,ctx));ctx.notes.add('Approximate word-level rendering.');}
+  }
+  let out=ms.map(x=>x.t).join(' ').replace(/ ([,;:.!?])/g,'$1').replace(/“ /g,'“').replace(/ ”/g,'”');
+  out=out?out[0].toUpperCase()+out.slice(1):'∅';
+  return {source,ms,notes:[...ctx.notes],draft:approximate||ctx.notes.size>0,approximate,out:out+(/[.!?]”?$/.test(out)||!/\p{L}/u.test(out)?'':/[?!]$/.test(source)?source.slice(-1):'.')};
+ });
+}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let last=[];
+function translate(){last=run(document.querySelector('#input').value,document.querySelector('#names').value,true);let ok=last.filter(x=>!x.error).length,drafts=last.filter(x=>x.draft).length;document.querySelector('#status').textContent=last.length?ok+' of '+last.length+' segments translated. '+drafts+' use automatic vocabulary or approximate grammar.':'Enter English text.';document.querySelector('#results').innerHTML=last.map(r=>'<div class="card"><div class="source">'+esc(r.source)+'</div>'+(r.error?'<p class="error">Needs human translation: '+esc(r.error)+'</p>':'<p class="badge">'+(r.approximate?'AUTOMATIC · APPROXIMATE GRAMMAR':r.draft?'AUTOMATIC · COINED VOCABULARY':'RULE-BASED OUTPUT')+'</p><p class="text">'+esc(r.out)+'</p>'+(r.notes.length?'<details><summary>Review '+r.notes.length+' assumptions</summary><ul>'+r.notes.map(n=>'<li>'+esc(n)+'</li>').join('')+'</ul></details>':'')+'<div class="gloss">'+r.ms.map(x=>'<div class="morph">'+esc(x.t)+'<span>'+esc(x.g)+'</span></div>').join('')+'</div>')+'</div>').join('');saveMemory();renderMemory();dictionary();}
+function saveMemory(){try{localStorage.setItem(MEMORY_KEY,JSON.stringify([...learned.values()]));return true;}catch(e){return false;}}
+function renderMemory(){const el=document.querySelector('#memoryRows');if(!el)return;el.innerHTML=[...learned.entries()].map(([key,r])=>'<tr data-key="'+esc(key)+'"><td>'+esc(r.en)+'<br><small>'+esc(r.pos)+'</small></td><td><input data-field="de" aria-label="Root for '+esc(r.en)+'" value="'+esc(r.de)+'"></td><td><input data-field="note" aria-label="Meaning of '+esc(r.en)+'" value="'+esc(r.note)+'"></td><td><small>'+ 'Saved'+'</small><br><button data-save="'+esc(key)+'">Save changes</button></td></tr>').join('');document.querySelector('#memoryStatus').textContent=learned.size+' remembered word assignments. '+(saveMemory()?'Saved in this browser; export a backup for other devices.':'Browser storage is unavailable. Export before closing.');}
+function validateLearned(rec){
+ if(!rec||!['noun','verb','adjective','adverb'].includes(rec.pos)||!/^[a-z]{2,60}$/.test(rec.en)||reservedWords.has(rec.en)||context('').names.has(rec.en))fail('Invalid or reserved learned word.');
+ if(typeof rec.de!=='string'||!/^(?:[pbtdkgfvszhmnrlwaeiouy]|sh|kh){3,30}$/.test(rec.de)||!/[aeiou]/.test(rec.de))fail('Invalid Deonic root for '+rec.en);
+ if(rec.note&&typeof rec.note!=='string')fail('Definition must be text.');
+ if(rec.note?.length>1000)fail('Definition too long.');
+ const key=rec.pos+':'+rec.en,old=learned.get(key),table=rec.pos==='noun'?N:rec.pos==='verb'?verbs:rec.pos==='adjective'?A:ADV;
+ if(Object.hasOwn(table,rec.en)&&!old)fail('Cannot replace an established '+rec.pos+': '+rec.en);
+ if(usedRoots().has(rec.de)&&old?.de!==rec.de)fail('Root already used: '+rec.de);
+ for(const a of rec.aliases||[]){if(!a||!/^[a-z]{2,60}$/.test(a.word)||!['base','past','present','part','ing'].includes(a.f)||reservedWords.has(a.word)||(forms[a.word]||[]).some(x=>x.v.en!==rec.en))fail('Invalid or conflicting English inflection.');}
+ return {en:rec.en,pos:rec.pos,de:rec.de,note:rec.note||'',approved:true,aliases:rec.aliases||[]};
+}
+function importLearned(list){
+ if(!Array.isArray(list)||list.length>2000)fail('Invalid learned-word list.');
+ const snapshots=[N,A,ADV,verbs,forms].map(t=>Object.fromEntries(Object.entries(t).map(([k,v])=>[k,Array.isArray(v)?[...v]:v]))),old=new Map(learned);
+ try{for(const item of list){let r=validateLearned(item);learned.set(r.pos+':'+r.en,r);installLearned(r);}}
+ catch(e){[N,A,ADV,verbs,forms].forEach((t,i)=>{Object.keys(t).forEach(k=>delete t[k]);Object.assign(t,snapshots[i]);});learned.clear();old.forEach((v,k)=>learned.set(k,v));throw e;}
+}
+const additions=[];
+const LOAN_KEY='deonics.pronunciation-loans.v1';
+function adaptPronunciation(input){
+ if(typeof input!=='string'||input.length>150)fail('Pronunciation must be at most 150 characters.');
+ let source=input.normalize('NFC').replace(/[\/\[\]ˈˌːˑ.\s]/g,'').replace(/t͡ʃ|tʃ/g,'ʃ').replace(/d͡ʒ|dʒ/g,'j').replace(/sh/g,'ʃ').replace(/kh/g,'x');
+ const replacements={'ɪ':'i','ʊ':'u','ɛ':'e','æ':'a','ɑ':'a','ɐ':'a','ɔ':'o','ɒ':'o','ə':'e','ɜ':'e','ʌ':'e','θ':'t','ð':'d','ʒ':'ʃ','ŋ':'n','ɹ':'r','ɾ':'r','ç':'x','y':'j'};
+ let sounds=[];for(const ch of source){let v=replacements[ch]||ch;if(!'pbtdkgfvszʃxhmnrljwaeiou'.includes(v))fail('Unsupported pronunciation symbol: '+ch);sounds.push(v);}
+ if(!sounds.length)fail('Enter a source pronunciation.');
+ let mapped=sounds.join(''),out=[],run=0;for(const ch of sounds){if('aeiou'.includes(ch)){run=0;}else{if(run===2){out.push('e');run=0;}run++;}out.push(ch);}
+ if(!out.some(c=>'aeiou'.includes(c)))out.push('e');
+ const spell=s=>s.replace(/ʃ/g,'sh').replace(/x/g,'kh').replace(/j/g,'y');
+ return {de:spell(out.join('')),trace:['Source phonemes: '+source,'Sound substitutions: '+mapped,'Cluster repair: '+out.join(''),'Deonic spelling: '+spell(out.join(''))]};
+}
+function proposeLoan(input){
+ let en=String(input.en||'').trim().toLowerCase();if(!/^[a-z]{2,60}$/.test(en))fail('Use a single English singular noun as the dictionary key.');
+ if(Object.hasOwn(N,en))return {existing:true,en,de:N[en].de,trace:['Existing dictionary word: '+N[en].de+'. Reuse it.']};
+ if(Object.hasOwn(A,en)||Object.hasOwn(forms,en)||Object.hasOwn(P,en)||Object.hasOwn(numbers,en)||context('').names.has(en))fail('That key is already used by the grammar or a sacred name.');
+ const reserved='the a an of and but because if then is are am was were has have had do does did will may not to for in at on with from who what hello hi greetings goodbye thanks youall'.split(' ');
+ if(reserved.includes(en)||Object.hasOwn(possess,en))fail('That key is a grammatical word.');
+ let roots=String(input.roots||'').trim().toLowerCase(),de,trace;
+ if(roots){let keys=roots.split(/\s+/);if(keys.length<2||keys.length>4)fail('Use two to four known noun roots.');if(!keys.every(k=>Object.hasOwn(N,k)))fail('All compound roots must already be nouns in the dictionary.');let raw=keys.map(k=>N[k].de).join('').replace(/q/g,'k').replace(/th/g,'t');let a=adaptPronunciation(raw);de=a.de;trace=['Compound meaning: '+keys.join(' + ')+' (last root is the head).','Conservative q/th normalized to their k/t pronunciation.',...a.trace];}
+ else{let a=adaptPronunciation(input.ipa);de=a.de;trace=a.trace;}
+ const used=[...Object.values(N).map(n=>n.de),...Object.values(A),...Object.values(verbs).map(v=>v.stem),...context('').names.keys()];
+ if(used.some(w=>w.toLowerCase()===de.toLowerCase()))fail('The resulting form “'+de+'” is already used. Choose another meaningful compound or source pronunciation.');
+ let source=String(input.source||'').trim();if(!roots&&!source)fail('Record the source language or borrowing route.');
+ return {en,de,roots,source:source.slice(0,100),ipa:roots?'':input.ipa,trace};
+}
+function adoptLoan(input){const p=proposeLoan(input);if(p.existing)return p;N[p.en]={en:p.en,de:p.de,pl:null,cls:'count',added:true};additions.push({en:p.en,de:p.de,roots:p.roots,source:p.source,ipa:p.ipa});return p;}
+function restoreLoans(records){
+ if(!Array.isArray(records)||records.length>1000)fail('Expected at most 1,000 vocabulary records.');
+ let pending=[];try{for(const rec of records){if(!rec||typeof rec!=='object')fail('Invalid vocabulary record.');const p=adoptLoan(rec);if(!p.existing)pending.push(p.en);if(p.de!==rec.de)fail('Saved form does not match these sound rules: '+rec.en);}}
+ catch(e){for(const en of pending){delete N[en];let i=additions.findIndex(x=>x.en===en);if(i>=0)additions.splice(i,1);}throw e;}
+}
+function wordStatus(en,pos){let r=learned.get(pos+':'+en);return r?'; automatically saved word':'';}
+function entriesList(){return [...Object.values(N).map(n=>[n.en,n.de,'noun; '+n.cls+(n.added&&!n.learned?'; adopted addition':'')+wordStatus(n.en,'noun')+(n.pl?'; plural '+n.pl:'')]),...Object.entries(A).map(([e,d])=>[e,d,'adjective stem'+wordStatus(e,'adjective')]),...Object.entries(ADV).map(([e,d])=>[e,d,'adverb'+wordStatus(e,'adverb')]),...Object.values(verbs).map(v=>[v.en,v.stem+'ar','verb; '+v.kind+wordStatus(v.en,'verb')+(v.oldpast?'; past stem '+v.oldpast:'')]),...Object.entries(numbers).map(([e,d])=>[e,d[0],'numeral'])].sort((a,b)=>a[0].localeCompare(b[0]));}
+function dictionary(){let entries=entriesList(),q=document.querySelector('#search').value.toLowerCase();document.querySelector('#count').textContent=entries.length+' lexical entries (including explicitly listed synonyms).';document.querySelector('#lex').innerHTML=entries.filter(e=>e.join(' ').toLowerCase().includes(q)).map(e=>'<tr>'+e.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('');}
+if(typeof document!=='undefined'){
+ try{let saved=localStorage.getItem(MEMORY_KEY);if(saved)importLearned(JSON.parse(saved));}catch(e){document.querySelector('#memoryStatus').textContent='Saved word memory could not be loaded: '+e.message;}
+ document.querySelector('#memoryRows').onclick=e=>{const key=e.target.dataset.save;if(!key)return;try{let row=e.target.closest('tr'),r=validateLearned({...learned.get(key),de:row.querySelector('[data-field="de"]').value.trim(),note:row.querySelector('[data-field="note"]').value,approved:true});learned.set(key,r);installLearned(r);saveMemory();translate();}catch(err){document.querySelector('#memoryStatus').textContent=err.message;}};
+ document.querySelector('#memoryExport').onclick=()=>{let a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({schema:'deonics-memory-1',learned:[...learned.values()],loans:additions},null,2)],{type:'application/json'}));a.href=u;a.download='Deonics-vocabulary-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+ document.querySelector('#memoryImport').onchange=async e=>{try{let file=e.target.files[0];if(!file)return;if(file.size>2000000)fail('Backup too large.');let data=JSON.parse(await file.text());if(data.schema!=='deonics-memory-1')fail('Unknown backup format.');importLearned(data.learned);restoreLoans(data.loans||[]);localStorage.setItem(LOAN_KEY,JSON.stringify(additions));saveMemory();translate();}catch(err){document.querySelector('#memoryStatus').textContent='Import stopped: '+err.message;}};
+ const loanStatus=document.querySelector('#loanStatus');
+ const loanInput=()=>({en:document.querySelector('#loanMeaning').value,source:document.querySelector('#loanSource').value,ipa:document.querySelector('#loanIPA').value,roots:document.querySelector('#loanRoots').value});
+ function persistLoans(){try{localStorage.setItem(LOAN_KEY,JSON.stringify(additions));return 'Saved in this browser. Export a backup for other copies.';}catch(e){return 'Available in this session only; browser storage is unavailable. Export a backup.';}}
+ try{let raw=localStorage.getItem(LOAN_KEY);if(raw)restoreLoans(JSON.parse(raw));}catch(e){loanStatus.textContent='Saved vocabulary could not be loaded: '+e.message;}
+ document.querySelector('#loanPreview').onclick=()=>{try{let p=proposeLoan(loanInput());document.querySelector('#loanTrace').textContent=p.trace.join('\n');loanStatus.textContent=p.existing?'Already in the dictionary.':'Proposed noun: '+p.de+'. Adopt it to use it in sentences.';}catch(e){document.querySelector('#loanTrace').textContent='';loanStatus.textContent=e.message;}};
+ document.querySelector('#loanAdopt').onclick=()=>{try{let p=adoptLoan(loanInput());document.querySelector('#loanTrace').textContent=p.trace.join('\n');loanStatus.textContent=p.existing?'Reusing existing word: '+p.de:p.de+' adopted. '+persistLoans();dictionary();translate();}catch(e){loanStatus.textContent=e.message;}};
+ document.querySelector('#loanExport').onclick=()=>{let a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({schema:'deonics-loans-1',entries:additions},null,2)],{type:'application/json'}));a.href=u;a.download='Deonics-added-vocabulary.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+ document.querySelector('#loanImport').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;if(f.size>1000000)fail('Vocabulary file is too large.');let data=JSON.parse(await f.text());if(data.schema!=='deonics-loans-1')fail('Unknown vocabulary format.');restoreLoans(data.entries);loanStatus.textContent='Vocabulary restored. '+persistLoans();dictionary();translate();}catch(err){loanStatus.textContent='Import stopped: '+err.message;}};
+ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==b.dataset.tab);document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));});
+ document.querySelector('#go').onclick=translate;document.querySelector('#search').oninput=dictionary;
+ document.querySelector('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(last.filter(x=>!x.error).map(x=>x.out).join('\n'));document.querySelector('#status').textContent='Rendered text copied, including any provisional drafts. Unresolved segments were omitted; review the on-screen warnings.';}catch(e){document.querySelector('#status').textContent='Clipboard unavailable. Use Download results or select the text.';}};
+ document.querySelector('#download').onclick=()=>{let a=document.createElement('a'),u=URL.createObjectURL(new Blob([last.map(x=>x.source+'\n'+(x.error?'UNRESOLVED: '+x.error:(x.draft?'PROVISIONAL DRAFT\n':'RULE-BASED OUTPUT\n')+x.out+'\n'+x.ms.map(m=>m.g).join(' ')+'\n'+x.notes.join('\n'))).join('\n\n')],{type:'text/plain;charset=utf-8'}));a.href=u;a.download='Deonics-translation.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+ dictionary();translate();
+}
+</script></body></html>
